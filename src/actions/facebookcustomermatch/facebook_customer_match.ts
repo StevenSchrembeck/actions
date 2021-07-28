@@ -19,10 +19,27 @@ export class FacebookCustomerMatchAction extends Hub.Action {
 
 
   async execute(hubRequest: Hub.ActionRequest) {
+    console.log("Begin running")
     const executor = new FacebookCustomerMatchExecutor(hubRequest, true);
     await executor.run()
     console.log("Done running!");
     return new Hub.ActionResponse();
+  }
+
+  async form() {
+    let form = new Hub.ActionForm()
+    form.fields = [{
+      label: "Test1",
+      name: "test1",
+      required: true,
+      type: "string",
+    }, {
+      label: "Test2",
+      name: "test2",
+      required: true,
+      type: "string",
+    }]
+    return form
   }
 
 }
@@ -35,6 +52,7 @@ import * as crypto from "crypto"
 import * as lodash from "lodash"
 import * as oboe from "oboe"
 import { Readable } from "stream"
+import { CollectionResponsePublicImportResponse } from "@hubspot/api-client/lib/codegen/crm/imports/model/collectionResponsePublicImportResponse";
 
 const BATCH_SIZE = 5000; // Maximum size allowable by Facebook endpoint
 // TODO move to separate files once ready
