@@ -125,7 +125,6 @@ export class FacebookCustomerMatchExecutor {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
         .node("!.*", (row: any) => {
-          debugger;
           if (!this.isSchemaDetermined) {
             this.determineSchema(row)
           }
