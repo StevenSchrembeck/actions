@@ -52,7 +52,6 @@ import * as crypto from "crypto"
 import * as lodash from "lodash"
 import * as oboe from "oboe"
 import { Readable } from "stream"
-import { CollectionResponsePublicImportResponse } from "@hubspot/api-client/lib/codegen/crm/imports/model/collectionResponsePublicImportResponse";
 
 const BATCH_SIZE = 5000; // Maximum size allowable by Facebook endpoint
 // TODO move to separate files once ready
