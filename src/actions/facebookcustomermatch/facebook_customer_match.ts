@@ -37,23 +37,28 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   }
 
   async form(hubRequest: Hub.ActionRequest) {
-    const formBuilder = new FacebookFormBuilder();
-    const loginForm = formBuilder.generateLoginForm(hubRequest);
-    return loginForm;
+    try {
+      const formBuilder = new FacebookFormBuilder();
+      const loginForm = formBuilder.generateLoginForm(hubRequest);
+      return loginForm;
 
-    let form = new Hub.ActionForm()
-    form.fields = [{
-      label: "Test1",
-      name: "test1",
-      required: true,
-      type: "string",
-    }, {
-      label: "Test2",
-      name: "test2",
-      required: true,
-      type: "string",
-    }]
-    return form
+    } catch (err) {
+      console.error(err);
+
+      let form = new Hub.ActionForm()
+      form.fields = [{
+        label: "Test1",
+        name: "test1",
+        required: true,
+        type: "string",
+      }, {
+        label: "Test2",
+        name: "test2",
+        required: true,
+        type: "string",
+      }]
+      return form
+      }
   }
 
   async oauthUrl(redirectUri: string, encryptedState: string) {
