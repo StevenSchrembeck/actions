@@ -6,9 +6,9 @@ import * as querystring from "querystring"
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
-  readonly name = "facebook_ads_customer_match"
-  readonly label = "Facebook Ads Customer Match"
-  readonly iconName = "facebook-customer-match/facebook_ads_icon.png"
+  readonly name = "facebook_customer_match"
+  readonly label = "Facebook Customer Match"
+  readonly iconName = "facebookcustomermatch/facebook_ads_icon.png"
   readonly description = "TODO."
   readonly supportedActionTypes = [Hub.ActionType.Query]
   readonly supportedFormats = [Hub.ActionFormat.JsonLabel]
@@ -304,7 +304,7 @@ class FacebookFormBuilder {
     // Step 1 in the oauth flow - user clicks the button in the form and visits the AH url generated here.
     // That response will be auto handled by the AH server as a redirect to the result of oauthUrl function below.
     const startAuthUrl =
-      `${process.env.ACTION_HUB_BASE_URL}/actions/facebook-customer-match/oauth?state=${encryptedPayload}`
+      `${process.env.ACTION_HUB_BASE_URL}/actions/facebook_customer_match/oauth?state=${encryptedPayload}`
 
     console.log("debug", "login form has startAuthUrl=", startAuthUrl)
 
