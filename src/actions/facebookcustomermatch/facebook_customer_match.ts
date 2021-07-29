@@ -98,7 +98,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     const tokens = {longLivedToken}
 
     const customAudienceUrl = `https://graph.facebook.com/v11.0/act_114109700789636/customaudiences?access_token=${longLivedToken}`
-    const customAudienceTestResponse = await gaxios.request<any>({method: 'GET', url: customAudienceUrl}).then((stuff) => console.log(stuff)).catch((err) => console.log(err))
+    const customAudienceTestResponse = await gaxios.request<any>({method: 'GET', url: customAudienceUrl}).then((stuff) => console.log(JSON.stringify(stuff))).catch((err) => console.log(err))
     console.log('we did it! ' + customAudienceTestResponse)
 
     const userState = { tokens, redirect: redirectUri }
