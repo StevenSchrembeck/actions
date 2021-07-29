@@ -3,6 +3,7 @@ import * as Hub from "../../hub"
 import {URL} from "url"
 import * as querystring from "querystring"
 // const LOG_PREFIX = "[FB Ads Customer Match]"
+import facebookBizSDK from "facebook-nodejs-business-sdk";
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
@@ -21,6 +22,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   readonly oauthClientId: string
   readonly oauthClientSecret: string
+  facebookAPI: any
 
   constructor(oauthClientId: string, oauthClientSecret: string) {
     super()
@@ -92,12 +94,25 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     
     // adding our app secret to the mix gives us a long-lived token (which lives ~60 days) instead of short-lived token
     const longLivedTokenRequestUri = `https://graph.facebook.com/v11.0/oauth/access_token?client_id=${this.oauthClientId}&redirect_uri=${redirectUri}&client_secret=${this.oauthClientSecret}&code=${urlParams.code}`;
-    
     const longLivedTokenResponse = await gaxios.request<any>({method: 'GET', url: longLivedTokenRequestUri})
+    
     const longLivedToken = longLivedTokenResponse.data.access_token;
-
-    console.log(longLivedToken)
     const tokens = {longLivedToken}
+
+    this.facebookAPI = facebookBizSDK.FacebookAdsApi.init(longLivedToken);
+    const adAccount = facebookBizSDK.AdAccount('106358305032036');
+    const fields: [] = [];
+    const params = {
+      'name' : 'My new Custom Audience',
+      'subtype' : 'CUSTOM',
+      'description' : 'People who purchased on my website',
+      'customer_file_source' : 'USER_PROVIDED_ONLY',
+    };
+    debugger;
+    const customaudiences = adAccount.createCustomAudience(
+      fields,
+      params
+    );
 
     const userState = { tokens, redirect: redirectUri }
 
