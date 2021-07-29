@@ -73,6 +73,12 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   }
 
   async oauthFetchInfo(urlParams: { [key: string]: string }, redirectUri: string) {
+    // urlparams: {code: 'AQBKv0AuStqhveCt8wUpZFdbSrJ9PjhqRxFs-_DXeqaQrB…OaIe2txeIelt5KsEvPSpFPJuzWxdCiZZp9AIR10Qk4cJQ', 
+    // state: '1043022mBJGxURyH_G_FhVZO4KlMgCT2-RAjBN_WHZ0Ze…_dlcjtHfS7wk4lA__Mx-cOUl9-jjUdGPGeNDaLDA6kkug'
+    // }
+    // redirecturi: 'https://looker-action-hub-fork.herokuapp.com/actions/facebook_customer_match/oauth_redirect'
+    // plaintext becomes: '{"stateUrl":"https://4mile.looker.com/action_hub_state/NjXxs7CpFyh9NhGxtbrXJv5bDVMCPDsFSD4ZgqQN"}'
+    // payload becomes: {stateUrl: 'https://4mile.looker.com/action_hub_state/NjXxs7CpFyh9NhGxtbrXJv5bDVMCPDsFSD4ZgqQN'}
     let plaintext
       try {
         const actionCrypto = new Hub.ActionCrypto()
@@ -82,9 +88,16 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
         throw err
       }
 
-    debugger;
-    const tokens = {bogusData: "here"}
     const payload = JSON.parse(plaintext)
+    
+    // adding our app secret to the mix gives us a long-lived token (which lives ~60 days) instead of short-lived token
+    const longLivedTokenRequestUri = `https://graph.facebook.com/v11.0/oauth/access_token?client_id=${this.oauthClientId}&redirect_uri=${redirectUri}&client_secret=${this.oauthClientSecret}&code=${urlParams.code}`;
+    
+    const longLivedTokenResponse = await gaxios.request<any>({method: 'GET', url: longLivedTokenRequestUri})
+    const longLivedToken = longLivedTokenResponse.data.access_token;
+
+    console.log(longLivedToken)
+    const tokens = {longLivedToken}
 
     const userState = { tokens, redirect: redirectUri }
 
