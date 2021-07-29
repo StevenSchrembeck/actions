@@ -21,11 +21,9 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   readonly oauthClientId: string
   readonly oauthClientSecret: string
-  readonly developerToken: string
 
-  constructor(oauthClientId: string, oauthClientSecret: string, developerToken: string) {
+  constructor(oauthClientId: string, oauthClientSecret: string) {
     super()
-    this.developerToken = developerToken
     this.oauthClientId = oauthClientId
     this.oauthClientSecret = oauthClientSecret
   }
@@ -325,12 +323,10 @@ class FacebookFormBuilder {
 
 if (process.env.FACEBOOK_CLIENT_ID
   && process.env.FACEBOOK_CLIENT_SECRET
-  && process.env.FACEBOOK_DEVELOPER_TOKEN
   ) {
     const fcma = new FacebookCustomerMatchAction(
       process.env.FACEBOOK_CLIENT_ID,
-      process.env.FACEBOOK_CLIENT_SECRET,
-      process.env.FACEBOOK_DEVELOPER_TOKEN,
+      process.env.FACEBOOK_CLIENT_SECRET
     );
     Hub.addAction(fcma);
 }
