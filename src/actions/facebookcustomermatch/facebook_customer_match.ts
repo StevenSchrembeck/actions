@@ -3,7 +3,6 @@ import * as Hub from "../../hub"
 import {URL} from "url"
 import * as querystring from "querystring"
 // const LOG_PREFIX = "[FB Ads Customer Match]"
-import facebookBizSDK from "facebook-nodejs-business-sdk";
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
@@ -22,7 +21,6 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   readonly oauthClientId: string
   readonly oauthClientSecret: string
-  facebookAPI: any
 
   constructor(oauthClientId: string, oauthClientSecret: string) {
     super()
@@ -99,20 +97,9 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     const longLivedToken = longLivedTokenResponse.data.access_token;
     const tokens = {longLivedToken}
 
-    this.facebookAPI = facebookBizSDK.FacebookAdsApi.init(longLivedToken);
-    const adAccount = facebookBizSDK.AdAccount('106358305032036');
-    const fields: [] = [];
-    const params = {
-      'name' : 'My new Custom Audience',
-      'subtype' : 'CUSTOM',
-      'description' : 'People who purchased on my website',
-      'customer_file_source' : 'USER_PROVIDED_ONLY',
-    };
-    debugger;
-    const customaudiences = adAccount.createCustomAudience(
-      fields,
-      params
-    );
+    const customAudienceUrl = `https://graph.facebook.com/v11.0/act_114109700789636/customaudiences?access_token=${longLivedToken}`
+    const customAudienceTestResponse = await gaxios.request<any>({method: 'GET', url: customAudienceUrl}).then((stuff) => console.log(stuff)).catch((err) => console.log(err))
+    console.log('we did it! ' + customAudienceTestResponse)
 
     const userState = { tokens, redirect: redirectUri }
 
