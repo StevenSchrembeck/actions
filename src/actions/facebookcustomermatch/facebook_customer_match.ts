@@ -67,7 +67,6 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       client_id: process.env.FACEBOOK_CLIENT_ID,
       redirect_uri: redirectUri,
       state: encryptedState,
-      response_type: "token",
     })
     console.log("Setting fb url as: " + url.toString()) // TODO remove this log.
     return url.toString()
