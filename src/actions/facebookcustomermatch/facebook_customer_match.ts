@@ -1,8 +1,10 @@
-import * as Hub from "../../hub";
-
+import * as gaxios from "gaxios"
+import * as Hub from "../../hub"
+import {URL} from "url"
+import * as querystring from "querystring"
 // const LOG_PREFIX = "[FB Ads Customer Match]"
 
-export class FacebookCustomerMatchAction extends Hub.Action {
+export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   readonly name = "facebook_ads_customer_match"
   readonly label = "Facebook Ads Customer Match"
@@ -17,6 +19,16 @@ export class FacebookCustomerMatchAction extends Hub.Action {
   readonly requiredFields = []
   readonly params = []
 
+  readonly oauthClientId: string
+  readonly oauthClientSecret: string
+  readonly developerToken: string
+
+  constructor(oauthClientId: string, oauthClientSecret: string, developerToken: string) {
+    super()
+    this.developerToken = developerToken
+    this.oauthClientId = oauthClientId
+    this.oauthClientSecret = oauthClientSecret
+  }
 
   async execute(hubRequest: Hub.ActionRequest) {
     console.log("Begin running")
@@ -26,7 +38,11 @@ export class FacebookCustomerMatchAction extends Hub.Action {
     return new Hub.ActionResponse();
   }
 
-  async form() {
+  async form(hubRequest: Hub.ActionRequest) {
+    const formBuilder = new FacebookFormBuilder();
+    const loginForm = formBuilder.generateLoginForm(hubRequest);
+    return loginForm;
+
     let form = new Hub.ActionForm()
     form.fields = [{
       label: "Test1",
@@ -40,6 +56,57 @@ export class FacebookCustomerMatchAction extends Hub.Action {
       type: "string",
     }]
     return form
+  }
+
+  async oauthUrl(redirectUri: string, encryptedState: string) {
+    const url = new URL("https://www.facebook.com/v11.0/dialog/oauth")
+    url.search = querystring.stringify({
+      client_id: process.env.FACEBOOK_CLIENT_ID,
+      redirect_uri: redirectUri,
+      state: encryptedState,
+      response_type: "token",
+    })
+    console.log("Setting fb url as: " + url.toString()) // TODO remove this log.
+    return url.toString()
+  }
+
+  async oauthFetchInfo(urlParams: { [key: string]: string }, redirectUri: string) {
+    let plaintext
+      try {
+        const actionCrypto = new Hub.ActionCrypto()
+        plaintext = await actionCrypto.decrypt(urlParams.state)
+      } catch (err) {
+        console.log("error", "Encryption not correctly configured: ", err.toString())
+        throw err
+      }
+
+    const tokens = {bogusData: "here"}
+    const payload = JSON.parse(plaintext)
+
+    const userState = { tokens, redirect: redirectUri }
+
+    // So now we use that state url to persist the oauth tokens
+    try {
+      await gaxios.request({
+        method: "POST",
+        url: payload.stateUrl,
+        data: userState,
+      })
+    } catch (err) {
+      // We have seen weird behavior where Looker correctly updates the state, but returns a nonsense status code
+      if (err instanceof gaxios.GaxiosError && err.response !== undefined && err.response.status < 100) {
+        console.log("debug", "Ignoring state update response with response code <100")
+      } else {
+        console.log("error", "Error sending user state to Looker:", err.toString())
+        throw err
+      }
+    }
+  }
+
+  async oauthCheck(request: Hub.ActionRequest) {
+    // TODO implement cheeck
+    console.log(request)
+    return true
   }
 
 }
@@ -207,4 +274,63 @@ export class FacebookCustomerMatchExecutor {
   }
 }
 
-Hub.addAction(new FacebookCustomerMatchAction())
+// TODO move to separate file when ready
+class FacebookFormBuilder {
+
+  async generateActionForm() {
+    const form = new Hub.ActionForm()
+
+    // TODO build action form
+
+    return form;
+  }
+
+  async generateLoginForm(actionRequest: Hub.ActionRequest) {
+    const payloadString = JSON.stringify({ stateUrl: actionRequest.params.state_url })
+    
+    //  Payload is encrypted to keep things private and prevent tampering
+    let encryptedPayload
+    try {
+      const actionCrypto = new Hub.ActionCrypto()
+      encryptedPayload = await actionCrypto.encrypt(payloadString)
+    } catch (e) {
+      console.log("error", "Payload encryption error:", e.toString())
+      throw e
+    }
+
+    // Step 1 in the oauth flow - user clicks the button in the form and visits the AH url generated here.
+    // That response will be auto handled by the AH server as a redirect to the result of oauthUrl function below.
+    const startAuthUrl =
+      `${process.env.ACTION_HUB_BASE_URL}/actions/facebook-customer-match/oauth?state=${encryptedPayload}`
+
+    console.log("debug", "login form has startAuthUrl=", startAuthUrl)
+
+    const form = new Hub.ActionForm()
+    form.state = new Hub.ActionState()
+    form.state.data = "reset"
+    form.fields = []
+    form.fields.push({
+      name: "login",
+      type: "oauth_link",
+      label: "Log in to Facebook",
+      description: "In order to use Facebook Customer Match as a destination, you will need to log in" +
+        " once to your Facebook account.",
+      oauth_url: startAuthUrl,
+    })
+    return form
+  }
+}
+
+/******** Register with Hub if prereqs are satisfied ********/
+
+if (process.env.FACEBOOK_CLIENT_ID
+  && process.env.FACEBOOK_CLIENT_SECRET
+  && process.env.FACEBOOK_DEVELOPER_TOKEN
+  ) {
+    const fcma = new FacebookCustomerMatchAction(
+      process.env.FACEBOOK_CLIENT_ID,
+      process.env.FACEBOOK_CLIENT_SECRET,
+      process.env.FACEBOOK_DEVELOPER_TOKEN,
+    );
+    Hub.addAction(fcma);
+}
