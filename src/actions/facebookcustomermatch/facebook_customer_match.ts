@@ -54,7 +54,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
         return actionForm
       }
     } catch (err) {
-      err = sanitizeError(err);
+      sanitizeError(err);
       console.error(err);
     }
 
@@ -113,12 +113,12 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
         data: userState,
       })
     } catch (err) {
-      err = sanitizeError(err)
+      sanitizeError(err)
       // We have seen weird behavior where Looker correctly updates the state, but returns a nonsense status code
       if (err instanceof gaxios.GaxiosError && err.response !== undefined && err.response.status < 100) {
         console.log("debug", "Ignoring state update response with response code <100")
       } else {
-        console.log("error", "Error sending user state to Looker:", err.toString())
+        console.log("error", "Error sending user state to Looker:", err && err.toString())
         throw err
       }
     }
@@ -153,7 +153,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       console.log("OAUTH CHECK PASSED")
       return true
     } catch (err) {
-      err = sanitizeError(err)
+      sanitizeError(err)
       console.log("Failed oauthCheck because access token was expired or due to an error: " + err)
       return false;
     }

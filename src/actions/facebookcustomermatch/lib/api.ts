@@ -26,29 +26,63 @@ export default class FacebookCustomerMatchApi {
             }
             ],
             "paging": {
-            "cursors": {
-                "before": "QVFIUk92XzMyQTQzZAXpVai12WUNJRWR3SWg3VnhvQUhSQkFDbEs4WmlnaTB2TTlKbHdubUZAYNkhDX0p0ckdXUy1fXzNXNnFaRjVkMzlReWIyY0pYeS1qc0hR",
-                "after": "QVFIUk92XzMyQTQzZAXpVai12WUNJRWR3SWg3VnhvQUhSQkFDbEs4WmlnaTB2TTlKbHdubUZAYNkhDX0p0ckdXUy1fXzNXNnFaRjVkMzlReWIyY0pYeS1qc0hR"
-            }
+                "cursors": {
+                    "before": "QVFIUk92XzMyQTQzZAXpVai12WUNJRWR3SWg3VnhvQUhSQkFDbEs4WmlnaTB2TTlKbHdubUZAYNkhDX0p0ckdXUy1fXzNXNnFaRjVkMzlReWIyY0pYeS1qc0hR",
+                    "after": "QVFIUk92XzMyQTQzZAXpVai12WUNJRWR3SWg3VnhvQUhSQkFDbEs4WmlnaTB2TTlKbHdubUZAYNkhDX0p0ckdXUy1fXzNXNnFaRjVkMzlReWIyY0pYeS1qc0hR"
+                }
             }
         },
         "id": "106358305032036"
     }*/
     async getBusinessAccountIds() {
+        return this.apiCall("GET", "me?fields=ids_for_business")
+    }
 
+    /*
+        Sample response:
+        {
+            "data": [
+                {
+                "account_id": "4213326242081640",
+                "id": "act_4213326242081640"
+                },
+                {
+                "account_id": "114109700789636", <-- side note: this is the one i use for testing
+                "id": "act_114109700789636"
+                },
+                {
+                "account_id": "131002649105099",
+                "id": "act_131002649105099"
+                }
+            ],
+            "paging": {
+                "cursors": {
+                "before": "MjM4NDc1NTgzMzk2MjAyMDEZD",
+                "after": "MjM4NDgxNTQwMDI3NTAwODAZD"
+                }
+            }
+        }
+    */
+    async getAdAccountsForBusiness(businessId: string) {
+        const addAcountsForBusinessUrl = `${businessId}/adaccounts`
+        return await this.apiCall("GET", addAcountsForBusinessUrl)
     }
 
     async getCustomAudiences(adAccountId: string) {
         adAccountId = '114109700789636'; // TODO remove hardcoded value
-        const customAudienceUrl = `https://graph.facebook.com/v11.0/act_${adAccountId}/customaudiences`
+        const customAudienceUrl = `act_${adAccountId}/customaudiences`
         return await this.apiCall("GET", customAudienceUrl)
     }
 
 
     async apiCall(method: "GET" | "POST", url: string, data?: any) {
+        let queryParamCharacter = "?"
+        if (url.indexOf("?")) { // don't use two question marks if the url already contains query parameters
+            queryParamCharacter = "&"
+        }
         const response = await gaxios.request<any>({
           method,
-          url: url + `?access_token=${this.accessToken}`,
+          url: url + `${queryParamCharacter}access_token=${this.accessToken}`,
           data,
           baseURL: API_BASE_URL,
         })
