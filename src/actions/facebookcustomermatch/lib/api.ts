@@ -31,8 +31,7 @@ export default class FacebookCustomerMatchApi {
     }*/
     async getBusinessAccountIds(): Promise<string[]> {
         const response = await this.apiCall("GET", "me?fields=ids_for_business")
-        debugger;
-        const ids = response.data["ids_for_business"].data.map((businessMetadata: any) => businessMetadata.id)
+        const ids = response["ids_for_business"].data.map((businessMetadata: any) => businessMetadata.id)
         return ids;
     }
 
@@ -56,9 +55,11 @@ export default class FacebookCustomerMatchApi {
             "paging": ...
         }
     */
-    async getAdAccountsForBusiness(businessId: string) {
+    async getAdAccountsForBusiness(businessId: string): Promise<string[]> {
         const addAcountsForBusinessUrl = `${businessId}/adaccounts`
-        return await this.apiCall("GET", addAcountsForBusinessUrl)
+        const response = await this.apiCall("GET", addAcountsForBusinessUrl)
+        const ids = response.data.map((adAccountMetadata: any) => adAccountMetadata.id)
+        return ids
     }
 
     /*
@@ -72,10 +73,11 @@ export default class FacebookCustomerMatchApi {
         "paging":...
         }
     */
-    async getCustomAudiences(adAccountId: string) {
+    async getCustomAudiences(adAccountId: string): Promise<string[]> {
         const customAudienceUrl = `act_${adAccountId}/customaudiences`
         const response = await this.apiCall("GET", customAudienceUrl)
-        return response.data.map((audienceMetadata: any) => audienceMetadata.id)
+        const ids = response.map((audienceMetadata: any) => audienceMetadata.id)
+        return ids
     }
 
     // TODO CREATE CUSTOM AUDIENCE

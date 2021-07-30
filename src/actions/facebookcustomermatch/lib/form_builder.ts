@@ -7,8 +7,17 @@ export default class FacebookFormBuilder {
 
       console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
 
-      let businessIds: string[] = []
-      let adAccountids: string[] = []
+      let businessIds: string[] = ['0']
+      let adAccountids: string[] = ['0']
+      let customAudienceIds: string[] = ['0']
+
+      businessIds = await facebookApi.getBusinessAccountIds()
+      adAccountids = await facebookApi.getAdAccountsForBusiness(businessIds[0])
+      customAudienceIds = await facebookApi.getCustomAudiences(adAccountids[0])
+      
+      console.log(businessIds)
+      console.log(adAccountids)
+      console.log(customAudienceIds)
 
       if(actionRequest.formParams.choose_business === "reset") {
         actionRequest.formParams = {}

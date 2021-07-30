@@ -144,7 +144,6 @@ export default class FacebookCustomerMatchExecutor {
   // addDataJobOperations requests in progress at one time. So we use this funky solution
   // to run one at a time, without having to refactor the streaming parser and everything too.
   private async sendBatch(): Promise<void> {
-    debugger;
     if (this.currentRequest !== undefined || this.batchQueue.length === 0) {
       return;
     }
