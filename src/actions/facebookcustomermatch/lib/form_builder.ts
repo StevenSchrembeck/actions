@@ -75,14 +75,34 @@ export default class FacebookFormBuilder {
       } else if (actionRequest.formParams.choose_create_update_replace === "update_audience" ||
                 actionRequest.formParams.choose_create_update_replace === "replace_audience") 
       {
+        const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
         form.fields.push({
-          label: "UDPDATE OR REPLACE PLACEHOLDER",
-          name: "test",
-          type: "string",
+          label: `Choose an audience to ${audienceActionType}`,
+          name: "choose_create_update_replace",
+          description: audienceActionType === "replace" ? "Replacing deletes all users from the audience then replaces them with new ones" : "",
+          required: true,
+          type: "select" as "select",
+          options: [
+            {name: "audience1", label: "My Cool Audience"},
+            {name: "audience2", label: "This other Audience"},
+            {name: "audience3", label: "August Audience"},
+          ]
+        })
+        form.fields.push({
+          label: "Should the data be hashed first?",
+          name: "should_hash",
+          description: "Yes is appropriate for most users. Only select No if you know your data has already been hashed.",      
+          required: true,
+          type: "select" as "select",
+          options: [
+            {name: "do_hashing", label: "Yes"},
+            {name: "do_no_hashing", label: "No"},
+          ],
+          default: "do_hashing"
         })
       }
 
-      
+
       return form
 
 
