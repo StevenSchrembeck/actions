@@ -5,7 +5,6 @@ import * as querystring from "querystring"
 import FacebookCustomerMatchExecutor from "./lib/executor"
 import FacebookFormBuilder from "./lib/form_builder"
 import {sanitizeError} from "./lib/util";
-import request = require("request")
 // const LOG_PREFIX = "[FB Ads Customer Match]"
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
