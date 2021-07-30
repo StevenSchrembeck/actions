@@ -25,17 +25,13 @@ export default class FacebookCustomerMatchApi {
                 }
             }
             ],
-            "paging": {
-                "cursors": {
-                    "before": "QVFIUk92XzMyQTQzZAXpVai12WUNJRWR3SWg3VnhvQUhSQkFDbEs4WmlnaTB2TTlKbHdubUZAYNkhDX0p0ckdXUy1fXzNXNnFaRjVkMzlReWIyY0pYeS1qc0hR",
-                    "after": "QVFIUk92XzMyQTQzZAXpVai12WUNJRWR3SWg3VnhvQUhSQkFDbEs4WmlnaTB2TTlKbHdubUZAYNkhDX0p0ckdXUy1fXzNXNnFaRjVkMzlReWIyY0pYeS1qc0hR"
-                }
-            }
+            "paging": ...
         },
         "id": "106358305032036"
     }*/
     async getBusinessAccountIds(): Promise<string[]> {
         const response = await this.apiCall("GET", "me?fields=ids_for_business")
+        debugger;
         const ids = response.data["ids_for_business"].data.map((businessMetadata: any) => businessMetadata.id)
         return ids;
     }
@@ -57,12 +53,7 @@ export default class FacebookCustomerMatchApi {
                 "id": "act_131002649105099"
                 }
             ],
-            "paging": {
-                "cursors": {
-                "before": "MjM4NDc1NTgzMzk2MjAyMDEZD",
-                "after": "MjM4NDgxNTQwMDI3NTAwODAZD"
-                }
-            }
+            "paging": ...
         }
     */
     async getAdAccountsForBusiness(businessId: string) {
@@ -70,9 +61,21 @@ export default class FacebookCustomerMatchApi {
         return await this.apiCall("GET", addAcountsForBusinessUrl)
     }
 
+    /*
+        Sample response:
+        {
+        "data": [
+            {
+            "id": "23847792490850535"
+            }
+        ],
+        "paging":...
+        }
+    */
     async getCustomAudiences(adAccountId: string) {
         const customAudienceUrl = `act_${adAccountId}/customaudiences`
-        return await this.apiCall("GET", customAudienceUrl)
+        const response = await this.apiCall("GET", customAudienceUrl)
+        return response.data.map((audienceMetadata: any) => audienceMetadata.id)
     }
 
     // TODO CREATE CUSTOM AUDIENCE

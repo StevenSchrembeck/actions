@@ -7,7 +7,8 @@ export default class FacebookFormBuilder {
 
       console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
 
-      let businessIds: string[] = [];
+      let businessIds: string[] = []
+      let adAccountids: string[] = []
 
       if(actionRequest.formParams.choose_business === "reset") {
         actionRequest.formParams = {}
@@ -28,9 +29,14 @@ export default class FacebookFormBuilder {
         options: [
           {name: "reset", label: "Start over"},
           ...await this.generateOptionsFromList(businessIds)
-        ] // TODO set first one as default
+        ],
+        default: businessIds?.[0]
       }]
       if (actionRequest.formParams.choose_business) {
+        if(!actionRequest.formParams.choose_ad_account) {
+          adAccountids = await facebookApi.getAdAccountsForBusiness(actionRequest.formParams.choose_business)
+        }
+
         form.fields.push({
           label: "Choose a Facebook ad account",
           name: "choose_ad_account",
@@ -38,10 +44,9 @@ export default class FacebookFormBuilder {
           interactive: true,
           type: "select" as "select",
           options: [
-            {name: "adaccount1", label: "Ad account 1"},
-            {name: "adaccount2", label: "Ad account 2"},
-            {name: "adaccount3", label: "Ad account 3"},
-          ] // TODO set first one as default
+            ...await this.generateOptionsFromList(adAccountids)
+          ], 
+          default: adAccountids?.[0]
         })
       }
       if (actionRequest.formParams.choose_ad_account) {
@@ -88,6 +93,11 @@ export default class FacebookFormBuilder {
       } else if (actionRequest.formParams.choose_create_update_replace === "update_audience" ||
                 actionRequest.formParams.choose_create_update_replace === "replace_audience") 
       {
+        if (!actionRequest.formParams.choose_ad_account) {
+          throw new Error("Cannot obtain audience list without an ad account selected")
+        }
+        const customAudiences = facebookApi.getCustomAudiences(actionRequest.formParams.choose_ad_account)
+
         const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
         form.fields.push({
           label: `Choose an audience to ${audienceActionType}`,
@@ -97,9 +107,7 @@ export default class FacebookFormBuilder {
           type: "select" as "select",
           interactive: true,
           options: [
-            {name: "audience1", label: "My Cool Audience"},
-            {name: "audience2", label: "This other Audience"},
-            {name: "audience3", label: "August Audience"},
+            ...(await this.generateOptionsFromList(customAudiences))
           ] // TODO set first one as default
         })
         form.fields.push({
