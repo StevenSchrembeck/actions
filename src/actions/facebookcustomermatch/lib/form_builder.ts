@@ -2,12 +2,21 @@ import * as Hub from "../../../hub";
 
 export default class FacebookFormBuilder {
 
-    async generateActionForm() {
-      const form = new Hub.ActionForm()
-  
-      // TODO build action form
-  
-      return form;
+    async generateActionForm(actionRequest: Hub.ActionRequest) {
+      console.log("Logging this thing to compile... " + actionRequest)
+      let form = new Hub.ActionForm()
+      form.fields = [{ // TODO replace
+        label: "Test1",
+        name: "test1",
+        required: true,
+        type: "string",
+      }, {
+        label: "Test2",
+        name: "test2",
+        required: true,
+        type: "string",
+      }]
+      return form
     }
   
     async generateLoginForm(actionRequest: Hub.ActionRequest) {

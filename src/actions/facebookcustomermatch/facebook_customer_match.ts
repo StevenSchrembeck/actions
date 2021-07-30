@@ -5,6 +5,7 @@ import * as querystring from "querystring"
 import FacebookCustomerMatchExecutor from "./lib/executor"
 import FacebookFormBuilder from "./lib/form_builder"
 import {sanitizeError} from "./lib/util";
+import request = require("request")
 // const LOG_PREFIX = "[FB Ads Customer Match]"
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
@@ -46,29 +47,19 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   }
 
   async form(hubRequest: Hub.ActionRequest) {
+    const formBuilder = new FacebookFormBuilder();
     try {
-      const formBuilder = new FacebookFormBuilder();
-      const loginForm = formBuilder.generateLoginForm(hubRequest);
-      return loginForm;
-
+      if(this.oauthCheck(hubRequest)) { // otherwise route to the login form below
+        const actionForm = formBuilder.generateActionForm(hubRequest);
+        return actionForm
+      }
     } catch (err) {
       err = sanitizeError(err);
       console.error(err);
+    }
 
-      let form = new Hub.ActionForm()
-      form.fields = [{
-        label: "Test1",
-        name: "test1",
-        required: true,
-        type: "string",
-      }, {
-        label: "Test2",
-        name: "test2",
-        required: true,
-        type: "string",
-      }]
-      return form
-      }
+    const loginForm = formBuilder.generateLoginForm(hubRequest);
+    return loginForm;
   }
 
   async oauthUrl(redirectUri: string, encryptedState: string) {
@@ -131,10 +122,38 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     }
   }
 
+
+  /*
+    Facebook expired responses look like (in v11):
+    {
+      "error": {
+        "message": "Error validating access token: Session has expired on Thursday, 29-Jul-21 10:00:00 PDT. The current time is Friday, 30-Jul-21 06:41:07 PDT.",
+        "type": "OAuthException",
+        "code": 190,
+        "error_subcode": 463,
+        "fbtrace_id": "A_muLgNXB2rhzyBV_3YbJeo"
+      }
+    }
+  */
   async oauthCheck(request: Hub.ActionRequest) {
-    // TODO implement cheeck
-    console.log(request)
-    return true
+    try {
+      const accessToken = this.getAccessTokenFromRequest(request)
+      if (!accessToken) {
+        console.log("Failed oauthCheck because access token was missing or malformed")
+        return false
+      }
+      const userDataRequestUri = `https://graph.facebook.com/v11.0/me?access_token=${accessToken}`;
+      const userDataResponse = await gaxios.request<any>({method: 'GET', url: userDataRequestUri})
+      if (userDataResponse.data.error && userDataResponse.data.error.message) {
+        console.log("Failed oauthCheck because access token was expired or due to an error: " + userDataResponse.data.error.message)
+        return false;
+      }
+      return true
+    } catch (err) {
+      err = sanitizeError(err)
+      console.log("Failed oauthCheck because access token was expired or due to an error: " + err)
+      return false;
+    }
   }
 
   protected getAccessTokenFromRequest(request: Hub.ActionRequest) : string | null {
