@@ -1,6 +1,6 @@
 import * as gaxios from "gaxios"
 
-const API_BASE_URL = "https://www.facebook.com/v11.0/"
+const API_BASE_URL = "https://graph.facebook.com/v11.0/"
 
 export default class FacebookCustomerMatchApi {
     readonly accessToken: string
