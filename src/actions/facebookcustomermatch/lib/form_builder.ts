@@ -15,124 +15,152 @@ export default class FacebookFormBuilder {
       console.log(businesses)
       adAccounts = await facebookApi.getAdAccountsForBusiness(businesses[0].id)
       console.log(adAccounts)
-      customAudiences = await facebookApi.getCustomAudiences(adAccounts[1].id)
+      customAudiences = await facebookApi.getCustomAudiences(adAccounts[0].id)
       console.log(customAudiences)
       
+      /*
+        [
+          {
+              "id": "497949387983810",
+              "name": "Webcraft LLC"
+          },
+          {
+              "id": "104000287081747",
+              "name": "4 Mile Analytics"
+          }
+        ]
+      */
 
-      // if(actionRequest.formParams.choose_business === "reset") {
-      //   actionRequest.formParams = {}
-      // }
+      /*
+        [
+          {
+          "name": "Test Ad Account 1",
+          "id": "114109700789636",
+          }
+        ]
+      */
+
+      /*
+        [
+            {
+            "name": "My new Custom Audience",
+            "id": "23847792490850535"
+            }
+        ]
+      */
+
+      if(actionRequest.formParams.choose_business === "reset") {
+        actionRequest.formParams = {}
+      }
 
       // if(!actionRequest.formParams.choose_business) {
       //   businessIds = await facebookApi.getBusinessAccountIds()
       // }
 
       let form = new Hub.ActionForm()
-      // form.fields = [{ // TODO replace
-      //   label: "Choose a business",
-      //   name: "choose_business",
-      //   description: "You can start over by choosing \"Start over\" from this list.",
-      //   required: true,
-      //   interactive: true,
-      //   type: "select" as "select",
-      //   options: [
-      //     {name: "reset", label: "Start over"},
-      //     ...await this.generateOptionsFromList(businessIds)
-      //   ],
-      //   default: businessIds.length > 0 ? businessIds[0] : undefined
-      // }]
-      // if (actionRequest.formParams.choose_business) {
-      //   if(!actionRequest.formParams.choose_ad_account) {
-      //     adAccountids = await facebookApi.getAdAccountsForBusiness(actionRequest.formParams.choose_business)
-      //   }
+      form.fields = [{ // TODO replace
+        label: "Choose a business",
+        name: "choose_business",
+        description: "You can start over by choosing \"Start over\" from this list.",
+        required: true,
+        interactive: true,
+        type: "select" as "select",
+        options: [
+          {name: "reset", label: "Start over"},
+          ...this.generateOptionsFromNamesAndIds(businesses)
+        ],
+      }]
+      if (actionRequest.formParams.choose_business) {
+        // if(!actionRequest.formParams.choose_ad_account) {
+        //   adAccountids = await facebookApi.getAdAccountsForBusiness(actionRequest.formParams.choose_business)
+        // }
 
-      //   form.fields.push({
-      //     label: "Choose a Facebook ad account",
-      //     name: "choose_ad_account",
-      //     required: true,
-      //     interactive: true,
-      //     type: "select" as "select",
-      //     options: [
-      //       ...await this.generateOptionsFromList(adAccountids)
-      //     ], 
-      //     default: adAccountids.length > 0 ? businessIds[0] : undefined
-      //   })
-      // }
-      // if (actionRequest.formParams.choose_ad_account) {
-      //   form.fields.push({
-      //     label: "Would you like to create a new audience, update existing, or replace existing?",
-      //     name: "choose_create_update_replace",
-      //     description: "Replacing deletes all users from the audience then replaces them with new ones",
-      //     required: true,
-      //     interactive: true,
-      //     type: "select" as "select",
-      //     options: [
-      //       {name: "create_audience", label: "Create new audience"},
-      //       {name: "update_audience", label: "Update existing audience"},
-      //       {name: "replace_audience", label: "Replace existing audience"},
-      //     ],
-      //     default: "create_audience"
-      //   })
-      // }
-      // if (actionRequest.formParams.choose_create_update_replace === "create_audience") {
-      //   form.fields.push({
-      //     label: "New audience name",
-      //     name: "create_audience_name",          
-      //     required: true,
-      //     type: "string",
-      //   })
-      //   form.fields.push({
-      //     label: "New audience description",
-      //     name: "create_audience_description",          
-      //     required: true,
-      //     type: "string",
-      //   })
-      //   form.fields.push({
-      //     label: "Should the data be hashed first?",
-      //     name: "should_hash",
-      //     description: "Yes is appropriate for most users. Only select No if you know your data has already been hashed.",      
-      //     required: true,
-      //     type: "select" as "select",
-      //     options: [
-      //       {name: "do_hashing", label: "Yes"},
-      //       {name: "do_no_hashing", label: "No"},
-      //     ],
-      //     default: "do_hashing"
-      //   })
-      // } else if (actionRequest.formParams.choose_create_update_replace === "update_audience" ||
-      //           actionRequest.formParams.choose_create_update_replace === "replace_audience") 
-      // {
-      //   if (!actionRequest.formParams.choose_ad_account) {
-      //     throw new Error("Cannot obtain audience list without an ad account selected")
-      //   }
-      //   const customAudiences = facebookApi.getCustomAudiences(actionRequest.formParams.choose_ad_account)
-      //   console.log(customAudiences)
+        form.fields.push({
+          label: "Choose a Facebook ad account",
+          name: "choose_ad_account",
+          required: true,
+          interactive: true,
+          type: "select" as "select",
+          options: [
+            ...this.generateOptionsFromNamesAndIds(adAccounts)
+          ],
+        })
+      }
+      if (actionRequest.formParams.choose_ad_account) {
+        form.fields.push({
+          label: "Would you like to create a new audience, update existing, or replace existing?",
+          name: "choose_create_update_replace",
+          description: "Replacing deletes all users from the audience then replaces them with new ones",
+          required: true,
+          interactive: true,
+          type: "select" as "select",
+          options: [
+            {name: "create_audience", label: "Create new audience"},
+            {name: "update_audience", label: "Update existing audience"},
+            {name: "replace_audience", label: "Replace existing audience"},
+          ],
+          default: "create_audience"
+        })
+      }
+      if (actionRequest.formParams.choose_create_update_replace === "create_audience") {
+        form.fields.push({
+          label: "New audience name",
+          name: "create_audience_name",          
+          required: true,
+          type: "string",
+        })
+        form.fields.push({
+          label: "New audience description",
+          name: "create_audience_description",          
+          required: true,
+          type: "string",
+        })
+        form.fields.push({
+          label: "Should the data be hashed first?",
+          name: "should_hash",
+          description: "Yes is appropriate for most users. Only select No if you know your data has already been hashed.",      
+          required: true,
+          type: "select" as "select",
+          options: [
+            {name: "do_hashing", label: "Yes"},
+            {name: "do_no_hashing", label: "No"},
+          ],
+          default: "do_hashing"
+        })
+      } else if (actionRequest.formParams.choose_create_update_replace === "update_audience" ||
+                actionRequest.formParams.choose_create_update_replace === "replace_audience") 
+      {
+        if (!actionRequest.formParams.choose_ad_account) {
+          throw new Error("Cannot obtain audience list without an ad account selected")
+        }
+        const customAudiences = facebookApi.getCustomAudiences(actionRequest.formParams.choose_ad_account)
+        console.log(customAudiences)
 
-      //   const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
-      //   form.fields.push({
-      //     label: `Choose an audience to ${audienceActionType}`,
-      //     name: "choose_create_update_replace",
-      //     description: audienceActionType === "replace" ? "Replacing deletes all users from the audience then replaces them with new ones" : "",
-      //     required: true,
-      //     type: "select" as "select",
-      //     interactive: true,
-      //     options: [
-      //       //...(await this.generateOptionsFromList(customAudiences))
-      //     ] // TODO set first one as default
-      //   })
-      //   form.fields.push({
-      //     label: "Should the data be hashed first?",
-      //     name: "should_hash",
-      //     description: "Yes is appropriate for most users. Only select No if you know your data has already been hashed.",      
-      //     required: true,
-      //     type: "select" as "select",
-      //     options: [
-      //       {name: "do_hashing", label: "Yes"},
-      //       {name: "do_no_hashing", label: "No"},
-      //     ],
-      //     default: "do_hashing"
-      //   })
-      // }
+        const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
+        form.fields.push({
+          label: `Choose an audience to ${audienceActionType}`,
+          name: "choose_create_update_replace",
+          description: audienceActionType === "replace" ? "Replacing deletes all users from the audience then replaces them with new ones" : "",
+          required: true,
+          type: "select" as "select",
+          interactive: true,
+          options: [
+            //...(this.generateOptionsFromNamesAndIds(customAudiences))
+          ] // TODO set first one as default
+        })
+        form.fields.push({
+          label: "Should the data be hashed first?",
+          name: "should_hash",
+          description: "Yes is appropriate for most users. Only select No if you know your data has already been hashed.",      
+          required: true,
+          type: "select" as "select",
+          options: [
+            {name: "do_hashing", label: "Yes"},
+            {name: "do_no_hashing", label: "No"},
+          ],
+          default: "do_hashing"
+        })
+      }
 
 
       return form

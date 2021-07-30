@@ -52,7 +52,7 @@ export default class FacebookCustomerMatchApi {
     async getAdAccountsForBusiness(businessId: string): Promise<{name: string, id: string}[]> {
         const addAcountsForBusinessUrl = `${businessId}/owned_ad_accounts?fields=name,account_id`
         const response = await this.apiCall("GET", addAcountsForBusinessUrl)
-        const namesAndIds = response.data.map((adAccountMetadata: any) => ({name: adAccountMetadata.name, id: adAccountMetadata.id}))
+        const namesAndIds = response.data.map((adAccountMetadata: any) => ({name: adAccountMetadata.name, id: adAccountMetadata.account_id}))
         return namesAndIds
     }
 
