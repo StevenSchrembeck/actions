@@ -4,7 +4,7 @@ import FacebookCustomerMatchApi from "./api";
 export default class FacebookFormBuilder {
 
     async generateActionForm(actionRequest: Hub.ActionRequest, facebookApi: FacebookCustomerMatchApi) {
-
+      console.log(facebookApi)
       console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
 
       let businesses:{name: string, id: string}[] = []
@@ -12,42 +12,32 @@ export default class FacebookFormBuilder {
       let customAudiences:{name: string, id: string}[] = []
 
       businesses = await facebookApi.getBusinessAccountIds()
-      console.log(businesses)
       adAccounts = await facebookApi.getAdAccountsForBusiness(businesses[0].id)
-      console.log(adAccounts)
       customAudiences = await facebookApi.getCustomAudiences(adAccounts[0].id)
-      console.log(customAudiences)
+      // businesses = [
+      //   {
+      //       "id": "497949387983810",
+      //       "name": "Webcraft LLC"
+      //   },
+      //   {
+      //       "id": "104000287081747",
+      //       "name": "4 Mile Analytics"
+      //   }
+      // ]
+      // adAccounts = [
+      //   {
+      //   "name": "Test Ad Account 1",
+      //   "id": "114109700789636",
+      //   }
+      // ]
+      // customAudiences = [
+      //   {
+      //   "name": "My new Custom Audience",
+      //   "id": "23847792490850535"
+      //   }
+      // ]
       
-      /*
-        [
-          {
-              "id": "497949387983810",
-              "name": "Webcraft LLC"
-          },
-          {
-              "id": "104000287081747",
-              "name": "4 Mile Analytics"
-          }
-        ]
-      */
-
-      /*
-        [
-          {
-          "name": "Test Ad Account 1",
-          "id": "114109700789636",
-          }
-        ]
-      */
-
-      /*
-        [
-            {
-            "name": "My new Custom Audience",
-            "id": "23847792490850535"
-            }
-        ]
-      */
+      
 
       if(actionRequest.formParams.choose_business === "reset") {
         actionRequest.formParams = {}
@@ -143,7 +133,6 @@ export default class FacebookFormBuilder {
           description: audienceActionType === "replace" ? "Replacing deletes all users from the audience then replaces them with new ones" : "",
           required: true,
           type: "select" as "select",
-          interactive: true,
           options: [
             ...(this.generateOptionsFromNamesAndIds(customAudiences))
           ] // TODO set first one as default
