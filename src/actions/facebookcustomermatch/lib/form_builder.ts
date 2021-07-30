@@ -9,6 +9,7 @@ export default class FacebookFormBuilder {
         label: "Test1",
         name: "test1",
         required: true,
+        interactive: true,
         type: "string",
       }]
       if (actionRequest.formParams.test1) {
@@ -16,10 +17,37 @@ export default class FacebookFormBuilder {
           label: "Test2",
           name: "test2",
           required: true,
+          interactive: true,          
+          type: "string",
+        })
+      }
+      if (actionRequest.formParams.test2) {
+        form.fields.push({
+          label: "Test3",
+          name: "test3",
+          required: true,
           type: "string",
         })
       }      
       return form
+
+
+      /*
+      > serial
+      | parallel
+
+      >pick a business id
+      >pick an ad account
+      >choose create, update, or replace (which is delete all + update)
+      if(create) {
+        |enter name
+        |enter description
+        |choose hash or no hash
+      } else { // update or replace
+        |choose an audience
+        |choose hash or no hash 
+      }
+      */
     }
   
     async generateLoginForm(actionRequest: Hub.ActionRequest) {
