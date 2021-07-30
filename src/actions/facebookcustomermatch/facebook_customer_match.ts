@@ -67,8 +67,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       client_id: process.env.FACEBOOK_CLIENT_ID,
       redirect_uri: redirectUri,
       state: encryptedState,
-    })
-    console.log("Setting fb url as: " + url.toString()) // TODO remove this log.
+    })    
     return url.toString()
   }
 
@@ -137,6 +136,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   */
   async oauthCheck(request: Hub.ActionRequest) {
     try {
+      debugger;
       const accessToken = this.getAccessTokenFromRequest(request)
       if (!accessToken) {
         console.log("Failed oauthCheck because access token was missing or malformed")
