@@ -129,7 +129,7 @@ export default class FacebookFormBuilder {
         const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
         form.fields.push({
           label: `Choose an audience to ${audienceActionType}`,
-          name: "choose_create_update_replace",
+          name: "choose_custom_audience",
           description: audienceActionType === "replace" ? "Replacing deletes all users from the audience then replaces them with new ones" : "",
           required: true,
           type: "select" as "select",
