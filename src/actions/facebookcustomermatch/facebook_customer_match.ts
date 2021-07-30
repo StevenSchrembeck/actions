@@ -48,8 +48,9 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   async form(hubRequest: Hub.ActionRequest) {
     const formBuilder = new FacebookFormBuilder();
     try {
-      if(this.oauthCheck(hubRequest)) {
-        const actionForm = formBuilder.generateActionForm(hubRequest);
+      const isAlreadyAuthenticated = await this.oauthCheck(hubRequest) 
+      if(isAlreadyAuthenticated){
+        const actionForm = formBuilder.generateActionForm(hubRequest)
         return actionForm
       }
     } catch (err) {
@@ -57,6 +58,8 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       console.error(err);
     }
 
+    // Return the login form to start over if anything goes wrong during authentication or form construction
+    // If a user is unauthenticated they are expected to hit an error above
     const loginForm = formBuilder.generateLoginForm(hubRequest);
     return loginForm;
   }
@@ -134,9 +137,8 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       }
     }
   */
-  async oauthCheck(request: Hub.ActionRequest) {
+  async oauthCheck(request: Hub.ActionRequest): Promise<boolean> {
     try {
-      debugger;
       const accessToken = this.getAccessTokenFromRequest(request)
       if (!accessToken) {
         console.log("Failed oauthCheck because access token was missing or malformed")
