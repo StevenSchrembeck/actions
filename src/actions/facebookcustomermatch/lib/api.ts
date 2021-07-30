@@ -14,52 +14,46 @@ export default class FacebookCustomerMatchApi {
 
     /*Sample response:
     {
-        "ids_for_business": {
+        "businesses": {
             "data": [
             {
-                "id": "106358305032036",
-                "app": {
-                "link": "https://www.facebook.com/games/?app_id=268147661731047",
-                "name": "LookerActionTest",
-                "id": "268147661731047"
-                }
+                "id": "497949387983810",
+                "name": "Webcraft LLC"
+            },
+            {
+                "id": "104000287081747",
+                "name": "4 Mile Analytics"
             }
             ],
-            "paging": ...
-        },
+        }
+        "paging": ...
         "id": "106358305032036"
     }*/
-    async getBusinessAccountIds(): Promise<string[]> {
-        const response = await this.apiCall("GET", "me?fields=ids_for_business")
-        const ids = response["ids_for_business"].data.map((businessMetadata: any) => businessMetadata.id)
-        return ids;
+    async getBusinessAccountIds(): Promise<{name: string, id: string}[]> {
+        const response = await this.apiCall("GET", "me?fields=businesses")
+        const namesAndIds = response["businesses"].data.map((businessMetadata: any) => ({name: businessMetadata.name, id: businessMetadata.id}))
+        return namesAndIds
     }
 
     /*
         Sample response:
+
         {
             "data": [
                 {
-                "account_id": "4213326242081640",
-                "id": "act_4213326242081640"
-                },
-                {
-                "account_id": "114109700789636", <-- side note: this is the one i use for testing
+                "name": "Test Ad Account 1",
+                "account_id": "114109700789636",
                 "id": "act_114109700789636"
-                },
-                {
-                "account_id": "131002649105099",
-                "id": "act_131002649105099"
                 }
             ],
-            "paging": ...
+            "paging": {}
         }
     */
-    async getAdAccountsForBusiness(businessId: string): Promise<string[]> {
-        const addAcountsForBusinessUrl = `${businessId}/adaccounts`
+    async getAdAccountsForBusiness(businessId: string): Promise<{name: string, id: string}[]> {
+        const addAcountsForBusinessUrl = `${businessId}/owned_ad_accounts?fields=name,account_id`
         const response = await this.apiCall("GET", addAcountsForBusinessUrl)
-        const ids = response.data.map((adAccountMetadata: any) => adAccountMetadata.id)
-        return ids
+        const namesAndIds = response.data.map((adAccountMetadata: any) => ({name: adAccountMetadata.name, id: adAccountMetadata.id}))
+        return namesAndIds
     }
 
     /*
@@ -67,17 +61,18 @@ export default class FacebookCustomerMatchApi {
         {
         "data": [
             {
+            "name": "My new Custom Audience",
             "id": "23847792490850535"
             }
         ],
         "paging":...
         }
     */
-    async getCustomAudiences(adAccountId: string): Promise<string[]> {
-        const customAudienceUrl = `act_${adAccountId}/customaudiences`
+    async getCustomAudiences(adAccountId: string): Promise<{name: string, id: string}[]> {
+        const customAudienceUrl = `act_${adAccountId}/customaudiences?fields=name`
         const response = await this.apiCall("GET", customAudienceUrl)
-        const ids = response.map((audienceMetadata: any) => audienceMetadata.id)
-        return ids
+        const namesAndIds = response.data.map((customAudienceMetadata: any) => ({name: customAudienceMetadata.name, id: customAudienceMetadata.id}))
+        return namesAndIds
     }
 
     // TODO CREATE CUSTOM AUDIENCE
