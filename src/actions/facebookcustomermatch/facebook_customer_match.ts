@@ -134,6 +134,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     }
   */
   async oauthCheck(request: Hub.ActionRequest) {
+    debugger;
     try {
       const accessToken = this.getAccessTokenFromRequest(request)
       if (!accessToken) {
@@ -141,8 +142,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
         return false
       }
       const userDataRequestUri = `https://graph.facebook.com/v11.0/me?access_token=${accessToken}`;
-      const userDataResponse = await gaxios.request<any>({method: 'GET', url: userDataRequestUri})
-      console.log("OAUTH CHECK RESPONSE IS: " + JSON.stringify(userDataResponse))
+      const userDataResponse = await gaxios.request<any>({method: 'GET', url: userDataRequestUri})      
       if (userDataResponse.data.error && userDataResponse.data.error.message) {
         console.log("Failed oauthCheck because access token was expired or due to an error: " + userDataResponse.data.error.message)
         return false;
