@@ -16,7 +16,7 @@ export default class FacebookFormBuilder {
           {name: "businessA", label: "YOUR DEFAULT BUSINESS HERE"},
           {name: "businessB", label: "Business B"},
           {name: "businessC", label: "Business C"},
-        ]
+        ] // TODO set first one as default
       }]
       if (actionRequest.formParams.choose_business) {
         form.fields.push({
@@ -29,7 +29,7 @@ export default class FacebookFormBuilder {
             {name: "adaccount1", label: "Ad account 1"},
             {name: "adaccount2", label: "Ad account 2"},
             {name: "adaccount3", label: "Ad account 3"},
-          ]
+          ] // TODO set first one as default
         })
       }
       if (actionRequest.formParams.choose_ad_account) {
@@ -44,7 +44,8 @@ export default class FacebookFormBuilder {
             {name: "create_audience", label: "Create new audience"},
             {name: "update_audience", label: "Update existing audience"},
             {name: "replace_audience", label: "Replace existing audience"},
-          ]
+          ],
+          default: "create_audience"
         })
       }
       if (actionRequest.formParams.choose_create_update_replace === "create_audience") {
@@ -82,11 +83,12 @@ export default class FacebookFormBuilder {
           description: audienceActionType === "replace" ? "Replacing deletes all users from the audience then replaces them with new ones" : "",
           required: true,
           type: "select" as "select",
+          interactive: true,
           options: [
             {name: "audience1", label: "My Cool Audience"},
             {name: "audience2", label: "This other Audience"},
             {name: "audience3", label: "August Audience"},
-          ]
+          ] // TODO set first one as default
         })
         form.fields.push({
           label: "Should the data be hashed first?",
