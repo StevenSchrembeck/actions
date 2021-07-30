@@ -7,34 +7,82 @@ export default class FacebookFormBuilder {
       console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
       let form = new Hub.ActionForm()
       form.fields = [{ // TODO replace
-        label: "Test1",
-        name: "test1",
+        label: "Choose a business",
+        name: "choose_business",
         required: true,
         interactive: true,
         type: "select" as "select",
         options: [
-          {name: "create", label: "Create new list"},
-          {name: "append", label: "Append to existing"},
-        ],
-        default: "create"
+          {name: "businessA", label: "YOUR DEFAULT BUSINESS HERE"},
+          {name: "businessB", label: "Business B"},
+          {name: "businessC", label: "Business C"},
+        ]
       }]
-      if (actionRequest.formParams.test1) {
+      if (actionRequest.formParams.choose_business) {
         form.fields.push({
-          label: "Test2",
-          name: "test2",
+          label: "Choose a Facebook ad account",
+          name: "choose_ad_account",
           required: true,
-          interactive: true,          
+          interactive: true,
+          type: "select" as "select",
+          options: [
+            {name: "adaccount1", label: "Ad account 1"},
+            {name: "adaccount2", label: "Ad account 2"},
+            {name: "adaccount3", label: "Ad account 3"},
+          ]
+        })
+      }
+      if (actionRequest.formParams.choose_ad_account) {
+        form.fields.push({
+          label: "Would you like to create a new audience, update existing, or replace existing?",
+          name: "choose_create_update_replace",
+          description: "Replacing deletes all users from the audience then replaces them with new ones",
+          required: true,
+          interactive: true,
+          type: "select" as "select",
+          options: [
+            {name: "create_audience", label: "Create new audience"},
+            {name: "update_audience", label: "Update existing audience"},
+            {name: "replace_audience", label: "Replace existing audience"},
+          ]
+        })
+      }
+      if (actionRequest.formParams.choose_create_update_replace === "create_audience") {
+        form.fields.push({
+          label: "New audience name",
+          name: "create_audience_name",          
+          required: true,
+          type: "string",
+        })
+        form.fields.push({
+          label: "New audience description",
+          name: "create_audience_description",          
+          required: true,
+          type: "string",
+        })
+        form.fields.push({
+          label: "Should the data be hashed first?",
+          name: "should_hash",
+          description: "Yes is appropriate for most users. Only select No if you know your data has already been hashed.",      
+          required: true,
+          type: "select" as "select",
+          options: [
+            {name: "do_hashing", label: "Yes"},
+            {name: "do_no_hashing", label: "No"},
+          ],
+          default: "do_hashing"
+        })
+      } else if (actionRequest.formParams.choose_create_update_replace === "update_audience" ||
+                actionRequest.formParams.choose_create_update_replace === "replace_audience") 
+      {
+        form.fields.push({
+          label: "UDPDATE OR REPLACE PLACEHOLDER",
+          name: "test",
           type: "string",
         })
       }
-      if (actionRequest.formParams.test2) {
-        form.fields.push({
-          label: "Test3",
-          name: "test3",
-          required: true,
-          type: "string",
-        })
-      }      
+
+      
       return form
 
 
