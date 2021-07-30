@@ -1,21 +1,33 @@
 import * as Hub from "../../../hub";
+import FacebookCustomerMatchApi from "./api";
 
 export default class FacebookFormBuilder {
 
-    async generateActionForm(actionRequest: Hub.ActionRequest) {
+    async generateActionForm(actionRequest: Hub.ActionRequest, facebookApi: FacebookCustomerMatchApi) {
 
       console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
+
+      let businessIds: string[] = [];
+
+      if(actionRequest.formParams.choose_business === "reset") {
+        actionRequest.formParams = {}
+      }
+
+      if(!actionRequest.formParams.choose_business) {
+        businessIds = await facebookApi.getBusinessAccountIds()
+      }
+
       let form = new Hub.ActionForm()
       form.fields = [{ // TODO replace
         label: "Choose a business",
         name: "choose_business",
+        description: "You can start over by choosing \"Start over\" from this list.",
         required: true,
         interactive: true,
         type: "select" as "select",
         options: [
-          {name: "businessA", label: "YOUR DEFAULT BUSINESS HERE"},
-          {name: "businessB", label: "Business B"},
-          {name: "businessC", label: "Business C"},
+          {name: "reset", label: "Start over"},
+          ...await this.generateOptionsFromList(businessIds)
         ] // TODO set first one as default
       }]
       if (actionRequest.formParams.choose_business) {
@@ -124,6 +136,13 @@ export default class FacebookFormBuilder {
         |choose hash or no hash 
       }
       */
+    }
+
+    async generateOptionsFromList(list: string[]): Promise<{name: string, label: string}[]> {
+      return list.map((item) => ({
+        "name": item,
+        "label": item
+      }))
     }
   
     async generateLoginForm(actionRequest: Hub.ActionRequest) {

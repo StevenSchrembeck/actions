@@ -8,7 +8,7 @@ export default class FacebookCustomerMatchApi {
         this.accessToken = accessToken
     }
 
-    async me() {
+    async me(): Promise<any> {
         return this.apiCall("GET", "me")
     }
 
@@ -34,8 +34,10 @@ export default class FacebookCustomerMatchApi {
         },
         "id": "106358305032036"
     }*/
-    async getBusinessAccountIds() {
-        return this.apiCall("GET", "me?fields=ids_for_business")
+    async getBusinessAccountIds(): Promise<string[]> {
+        const response = await this.apiCall("GET", "me?fields=ids_for_business")
+        const ids = response.data["ids_for_business"].data.map((businessMetadata: any) => businessMetadata.id)
+        return ids;
     }
 
     /*

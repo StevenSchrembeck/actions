@@ -5,6 +5,7 @@ import * as querystring from "querystring"
 import FacebookCustomerMatchExecutor from "./lib/executor"
 import FacebookFormBuilder from "./lib/form_builder"
 import {sanitizeError} from "./lib/util";
+import FacebookCustomerMatchApi from "./lib/api"
 // const LOG_PREFIX = "[FB Ads Customer Match]"
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
@@ -32,15 +33,15 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   }
 
   async execute(hubRequest: Hub.ActionRequest) {
-    let response = new Hub.ActionResponse();
-    const accessToken = this.getAccessTokenFromRequest(hubRequest);
+    let response = new Hub.ActionResponse()
+    const accessToken = this.getAccessTokenFromRequest(hubRequest)
     if(!accessToken) {
       response.state = new Hub.ActionState()
       response.state.data = "reset"
       response.success = false
       response.message = "Failed to execute Facebook Customer Match due to missing authentication credentials. No data sent to Facebook. Please try again or contact support"
     }
-    const executor = new FacebookCustomerMatchExecutor(hubRequest, true);
+    const executor = new FacebookCustomerMatchExecutor(hubRequest, true)
     await executor.run()
     return response;
   }
@@ -49,8 +50,10 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     const formBuilder = new FacebookFormBuilder();
     try {
       const isAlreadyAuthenticated = await this.oauthCheck(hubRequest) 
-      if(isAlreadyAuthenticated){
-        const actionForm = formBuilder.generateActionForm(hubRequest)
+      const accessToken = this.getAccessTokenFromRequest(hubRequest)
+      if(isAlreadyAuthenticated && accessToken){
+        const facebookApi = new FacebookCustomerMatchApi(accessToken)
+        const actionForm = formBuilder.generateActionForm(hubRequest, facebookApi)
         return actionForm
       }
     } catch (err) {
@@ -83,7 +86,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     // payload becomes: {stateUrl: 'https://4mile.looker.com/action_hub_state/NjXxs7CpFyh9NhGxtbrXJv5bDVMCPDsFSD4ZgqQN'}
     
     debugger;
-    
+
     let plaintext
     try {
       const actionCrypto = new Hub.ActionCrypto()
