@@ -5,6 +5,7 @@ import * as querystring from "querystring"
 import FacebookCustomerMatchExecutor from "./lib/executor"
 import FacebookFormBuilder from "./lib/form_builder"
 import {sanitizeError} from "./lib/util";
+import request = require("request")
 // const LOG_PREFIX = "[FB Ads Customer Match]"
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
@@ -47,9 +48,11 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   async form(hubRequest: Hub.ActionRequest) {
     const formBuilder = new FacebookFormBuilder();
-    try {      
-      const actionForm = formBuilder.generateActionForm(hubRequest);
-      return actionForm
+    try {
+      if(this.oauthCheck(hubRequest)) {
+        const actionForm = formBuilder.generateActionForm(hubRequest);
+        return actionForm
+      }
     } catch (err) {
       err = sanitizeError(err);
       console.error(err);
@@ -134,7 +137,6 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     }
   */
   async oauthCheck(request: Hub.ActionRequest) {
-    debugger;
     try {
       const accessToken = this.getAccessTokenFromRequest(request)
       if (!accessToken) {
@@ -147,6 +149,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
         console.log("Failed oauthCheck because access token was expired or due to an error: " + userDataResponse.data.error.message)
         return false;
       }
+      console.log("OAUTH CHECK PASSED")
       return true
     } catch (err) {
       err = sanitizeError(err)
