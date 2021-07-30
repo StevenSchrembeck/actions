@@ -81,14 +81,17 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     // redirecturi: 'https://looker-action-hub-fork.herokuapp.com/actions/facebook_customer_match/oauth_redirect'
     // plaintext becomes: '{"stateUrl":"https://4mile.looker.com/action_hub_state/NjXxs7CpFyh9NhGxtbrXJv5bDVMCPDsFSD4ZgqQN"}'
     // payload becomes: {stateUrl: 'https://4mile.looker.com/action_hub_state/NjXxs7CpFyh9NhGxtbrXJv5bDVMCPDsFSD4ZgqQN'}
+    
+    debugger;
+    
     let plaintext
-      try {
-        const actionCrypto = new Hub.ActionCrypto()
-        plaintext = await actionCrypto.decrypt(urlParams.state)
-      } catch (err) {
-        console.log("error", "Encryption not correctly configured: ", err.toString())
-        throw err
-      }
+    try {
+      const actionCrypto = new Hub.ActionCrypto()
+      plaintext = await actionCrypto.decrypt(urlParams.state)
+    } catch (err) {
+      console.log("error", "Encryption not correctly configured: ", err.toString())
+      throw err
+    }
 
     const payload = JSON.parse(plaintext)
     
