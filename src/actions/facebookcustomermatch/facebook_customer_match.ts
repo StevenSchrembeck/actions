@@ -5,7 +5,6 @@ import * as querystring from "querystring"
 import FacebookCustomerMatchExecutor from "./lib/executor"
 import FacebookFormBuilder from "./lib/form_builder"
 import {sanitizeError} from "./lib/util";
-import request = require("request")
 // const LOG_PREFIX = "[FB Ads Customer Match]"
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
@@ -112,6 +111,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
         data: userState,
       })
     } catch (err) {
+      err = sanitizeError(err)
       // We have seen weird behavior where Looker correctly updates the state, but returns a nonsense status code
       if (err instanceof gaxios.GaxiosError && err.response !== undefined && err.response.status < 100) {
         console.log("debug", "Ignoring state update response with response code <100")
