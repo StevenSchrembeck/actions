@@ -3,14 +3,20 @@ import * as Hub from "../../../hub";
 export default class FacebookFormBuilder {
 
     async generateActionForm(actionRequest: Hub.ActionRequest) {
-      console.log("Logging this thing to compile... " + actionRequest)
+
+      console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
       let form = new Hub.ActionForm()
       form.fields = [{ // TODO replace
         label: "Test1",
         name: "test1",
         required: true,
         interactive: true,
-        type: "string",
+        type: "select" as "select",
+        options: [
+          {name: "create", label: "Create new list"},
+          {name: "append", label: "Append to existing"},
+        ],
+        default: "create"
       }]
       if (actionRequest.formParams.test1) {
         form.fields.push({
