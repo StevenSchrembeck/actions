@@ -32,12 +32,17 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   }
 
   async execute(hubRequest: Hub.ActionRequest) {
-    console.log("Begin running")
-    debugger;
+    let response = new Hub.ActionResponse();
+    const accessToken = this.getAccessTokenFromRequest(hubRequest);
+    if(!accessToken) {
+      response.state = new Hub.ActionState()
+      response.state.data = "reset"
+      response.success = false
+      response.message = "Failed to execute Facebook Customer Match due to missing authentication credentials. No data sent to Facebook. Please try again or contact support"
+    }
     const executor = new FacebookCustomerMatchExecutor(hubRequest, true);
     await executor.run()
-    console.log("Done running!");
-    return new Hub.ActionResponse();
+    return response;
   }
 
   async form(hubRequest: Hub.ActionRequest) {
@@ -132,6 +137,15 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     return true
   }
 
+  protected getAccessTokenFromRequest(request: Hub.ActionRequest) : string | null {
+    try {
+      const params: any = request.params;
+      return JSON.parse(params.state_json).tokens.longLivedToken;
+    } catch (err) {
+      console.error("Failed to parse state for access token.")
+      return null;
+    }
+  }
 }
 
 
