@@ -30,7 +30,7 @@ export default class FacebookFormBuilder {
           {name: "reset", label: "Start over"},
           ...await this.generateOptionsFromList(businessIds)
         ],
-        default: businessIds?.[0]
+        default: businessIds.length > 0 ? businessIds[0] : undefined
       }]
       if (actionRequest.formParams.choose_business) {
         if(!actionRequest.formParams.choose_ad_account) {
@@ -46,7 +46,7 @@ export default class FacebookFormBuilder {
           options: [
             ...await this.generateOptionsFromList(adAccountids)
           ], 
-          default: adAccountids?.[0]
+          default: adAccountids.length > 0 ? businessIds[0] : undefined
         })
       }
       if (actionRequest.formParams.choose_ad_account) {
@@ -97,6 +97,7 @@ export default class FacebookFormBuilder {
           throw new Error("Cannot obtain audience list without an ad account selected")
         }
         const customAudiences = facebookApi.getCustomAudiences(actionRequest.formParams.choose_ad_account)
+        console.log(customAudiences)
 
         const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
         form.fields.push({
@@ -107,7 +108,7 @@ export default class FacebookFormBuilder {
           type: "select" as "select",
           interactive: true,
           options: [
-            ...(await this.generateOptionsFromList(customAudiences))
+            //...(await this.generateOptionsFromList(customAudiences))
           ] // TODO set first one as default
         })
         form.fields.push({
