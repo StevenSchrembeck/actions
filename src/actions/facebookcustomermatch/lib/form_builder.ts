@@ -133,8 +133,8 @@ export default class FacebookFormBuilder {
         if (!actionRequest.formParams.choose_ad_account) {
           throw new Error("Cannot obtain audience list without an ad account selected")
         }
-        const customAudiences = facebookApi.getCustomAudiences(actionRequest.formParams.choose_ad_account)
-        console.log(customAudiences)
+        // const customAudiences = facebookApi.getCustomAudiences(actionRequest.formParams.choose_ad_account)
+        // console.log(customAudiences)
 
         const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
         form.fields.push({
@@ -145,7 +145,7 @@ export default class FacebookFormBuilder {
           type: "select" as "select",
           interactive: true,
           options: [
-            //...(this.generateOptionsFromNamesAndIds(customAudiences))
+            ...(this.generateOptionsFromNamesAndIds(customAudiences))
           ] // TODO set first one as default
         })
         form.fields.push({
