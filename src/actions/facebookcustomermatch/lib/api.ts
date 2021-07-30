@@ -69,10 +69,13 @@ export default class FacebookCustomerMatchApi {
     }
 
     async getCustomAudiences(adAccountId: string) {
-        adAccountId = '114109700789636'; // TODO remove hardcoded value
         const customAudienceUrl = `act_${adAccountId}/customaudiences`
         return await this.apiCall("GET", customAudienceUrl)
     }
+
+    // TODO CREATE CUSTOM AUDIENCE
+    // TODO APPEND TO CUSTOM AUDIENCE
+    // TODO REPLACE CUSTOM AUDIENCE
 
 
     async apiCall(method: "GET" | "POST", url: string, data?: any) {

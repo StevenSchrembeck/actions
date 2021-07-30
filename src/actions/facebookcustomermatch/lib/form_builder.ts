@@ -10,12 +10,15 @@ export default class FacebookFormBuilder {
         name: "test1",
         required: true,
         type: "string",
-      }, {
-        label: "Test2",
-        name: "test2",
-        required: true,
-        type: "string",
       }]
+      if (actionRequest.formParams.test1) {
+        form.fields.push({
+          label: "Test2",
+          name: "test2",
+          required: true,
+          type: "string",
+        })
+      }      
       return form
     }
   
