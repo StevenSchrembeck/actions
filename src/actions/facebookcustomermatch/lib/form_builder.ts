@@ -12,12 +12,12 @@ export default class FacebookFormBuilder {
       let customAudiences:{name: string, id: string}[] = []
 
       businesses = await facebookApi.getBusinessAccountIds()
-      adAccounts = await facebookApi.getAdAccountsForBusiness(businesses[0].id)
-      customAudiences = await facebookApi.getCustomAudiences(adAccounts[1].id)
-      
       console.log(businesses)
+      adAccounts = await facebookApi.getAdAccountsForBusiness(businesses[0].id)
       console.log(adAccounts)
+      customAudiences = await facebookApi.getCustomAudiences(adAccounts[1].id)
       console.log(customAudiences)
+      
 
       // if(actionRequest.formParams.choose_business === "reset") {
       //   actionRequest.formParams = {}
@@ -156,10 +156,10 @@ export default class FacebookFormBuilder {
       */
     }
 
-    async generateOptionsFromList(list: string[]): Promise<{name: string, label: string}[]> {
+    generateOptionsFromNamesAndIds(list: {name: string, id: string}[]): {name: string, label: string}[] {
       return list.map((item) => ({
-        "name": item,
-        "label": item
+        "name": item.id,
+        "label": item.name
       }))
     }
   

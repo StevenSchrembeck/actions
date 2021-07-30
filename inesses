@@ -1,0 +1,20 @@
+[1mdiff --git a/src/actions/facebookcustomermatch/lib/form_builder.ts b/src/actions/facebookcustomermatch/lib/form_builder.ts[m
+[1mindex 73f6b19..57e036e 100644[m
+[1m--- a/src/actions/facebookcustomermatch/lib/form_builder.ts[m
+[1m+++ b/src/actions/facebookcustomermatch/lib/form_builder.ts[m
+[36m@@ -12,12 +12,12 @@[m [mexport default class FacebookFormBuilder {[m
+       let customAudiences:{name: string, id: string}[] = [][m
+ [m
+       businesses = await facebookApi.getBusinessAccountIds()[m
+[31m-      adAccounts = await facebookApi.getAdAccountsForBusiness(businesses[0].id)[m
+[31m-      customAudiences = await facebookApi.getCustomAudiences(adAccounts[1].id)[m
+[31m-      [m
+       console.log(businesses)[m
+[32m+[m[32m      adAccounts = await facebookApi.getAdAccountsForBusiness(businesses[0].id)[m
+       console.log(adAccounts)[m
+[32m+[m[32m      customAudiences = await facebookApi.getCustomAudiences(adAccounts[1].id)[m
+       console.log(customAudiences)[m
+[32m+[m[41m      [m
+ [m
+       // if(actionRequest.formParams.choose_business === "reset") {[m
+       //   actionRequest.formParams = {}[m
