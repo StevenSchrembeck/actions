@@ -132,6 +132,8 @@ export default class Server implements Hub.RouteBuilder {
       const request = Hub.ActionRequest.fromRequest(req)
       const action = await Hub.findAction(req.params.actionId, { lookerVersion: request.lookerVersion })
 
+      debugger;
+      
       let form
       if (isDelegateOauthAction(action) && request.params.test) {
         form = await (action as DelegateOAuthAction).oauthCheck(request)
