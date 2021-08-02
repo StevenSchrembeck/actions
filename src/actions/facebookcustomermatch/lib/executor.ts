@@ -5,7 +5,7 @@ import * as lodash from "lodash"
 import * as oboe from "oboe"
 import { Readable } from "stream"
 
-const BATCH_SIZE = 5000; // Maximum size allowable by Facebook endpoint
+const BATCH_SIZE = 10000; // Maximum size allowable by Facebook endpoint
 // TODO move to separate files once ready
 export default class FacebookCustomerMatchExecutor {
   private actionRequest: Hub.ActionRequest
@@ -101,6 +101,7 @@ export default class FacebookCustomerMatchExecutor {
         }
       }
     }
+    console.log(`Schema is: ` + JSON.stringify(this.schema))
     this.isSchemaDetermined = true
   }
 
