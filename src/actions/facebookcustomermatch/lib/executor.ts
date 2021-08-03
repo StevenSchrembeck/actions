@@ -4,7 +4,7 @@ import * as crypto from "crypto"
 import * as oboe from "oboe"
 import { Readable } from "stream"
 
-import {UserSchema, UserUploadSession, UserUploadPayload} from "./api"
+import {UserSchema} from "./api"
 
 const BATCH_SIZE = 3; // Maximum size allowable by Facebook endpoint
 
