@@ -5,6 +5,8 @@ import * as oboe from "oboe"
 import { Readable } from "stream"
 
 import {UserSchema, UserUploadSession, UserUploadPayload} from "./api"
+import FacebookCustomerMatchApi from "./api"
+import { reduceEachLeadingCommentRange } from "typescript";
 
 const BATCH_SIZE = 3; // Maximum size allowable by Facebook endpoint
 
@@ -27,11 +29,13 @@ export default class FacebookCustomerMatchExecutor {
   private schema: {[s: string]: FieldMapping} = {}
   private batchIncrementer: number = 0
   private sessionId: string
+  private facebookAPI: FacebookCustomerMatchApi
 
-  constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean) {
+  constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean, accessToken: string) {
     this.actionRequest = actionRequest
     this.doHashingBool = doHashingBool
     this.sessionId = "looker_customer_match_" + Date.now() // a unique id used to associate multiple requests with one custom audience API action
+    this.facebookAPI = new FacebookCustomerMatchApi(accessToken)
   }
 
   private fieldMapping : FieldMapping[] = [
@@ -161,7 +165,6 @@ export default class FacebookCustomerMatchExecutor {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
         .node("!.*", (row: any) => {
-          debugger;
           if (!this.isSchemaDetermined) {
             this.determineSchema(row)
           }
@@ -269,12 +272,16 @@ export default class FacebookCustomerMatchExecutor {
       schema: this.getAPIFormattedSchema(),
       data: currentBatch,
     };
-    this.currentRequest = new Promise<void>((resolve) => {
-      this.log("Pretending to send current batch: ");
-      this.log(JSON.stringify(sessionParameter))
-      this.log(JSON.stringify(payloadParameter))
-      resolve();
-    });
+
+    // this.currentRequest = new Promise<void>((resolve) => {
+    //   this.log("Pretending to send current batch: ");
+    //   this.log(JSON.stringify(sessionParameter))
+    //   this.log(JSON.stringify(payloadParameter))
+    //   resolve();
+    // });
+
+    //                                                   TODO UNHARDCODE \/
+    this.currentRequest = this.facebookAPI.appendUsersToCustomAudience("23847998265740535", sessionParameter, payloadParameter)
     await this.currentRequest;
     this.currentRequest = undefined;
     return this.sendBatch();

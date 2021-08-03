@@ -40,8 +40,9 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       response.state.data = "reset"
       response.success = false
       response.message = "Failed to execute Facebook Customer Match due to missing authentication credentials. No data sent to Facebook. Please try again or contact support"
+      return response
     }
-    const executor = new FacebookCustomerMatchExecutor(hubRequest, true)
+    const executor = new FacebookCustomerMatchExecutor(hubRequest, true, accessToken)
     await executor.run()
     return response;
   }
