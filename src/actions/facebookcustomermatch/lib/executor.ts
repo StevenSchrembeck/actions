@@ -6,7 +6,6 @@ import { Readable } from "stream"
 
 import {UserSchema, UserUploadSession, UserUploadPayload} from "./api"
 import FacebookCustomerMatchApi from "./api"
-import { reduceEachLeadingCommentRange } from "typescript";
 
 const BATCH_SIZE = 3; // Maximum size allowable by Facebook endpoint
 
