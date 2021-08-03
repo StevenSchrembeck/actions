@@ -4,7 +4,7 @@ import * as crypto from "crypto"
 import * as oboe from "oboe"
 import { Readable } from "stream"
 
-import {UserSchema} from "./api"
+import {UserSchema, UserUploadSession, UserUploadPayload} from "./api"
 
 const BATCH_SIZE = 3; // Maximum size allowable by Facebook endpoint
 
@@ -24,12 +24,14 @@ export default class FacebookCustomerMatchExecutor {
   private currentRequest: Promise<any> | undefined
   private isSchemaDetermined = false
   private rowQueue: any[] = []
-  private schema: {[s: string]: object} = {}
+  private schema: {[s: string]: FieldMapping} = {}
   private batchIncrementer: number = 0
+  private sessionId: string
 
   constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean) {
     this.actionRequest = actionRequest
     this.doHashingBool = doHashingBool
+    this.sessionId = "looker_customer_match_" + Date.now() // a unique id used to associate multiple requests with one custom audience API action
   }
 
   private fieldMapping : FieldMapping[] = [
@@ -202,7 +204,7 @@ export default class FacebookCustomerMatchExecutor {
     Missing data is filled in with empty strings to maintain array order.
   */
   private transformRow(row: any) {
-    const schemaMapping = Object.entries(this.schema) as [string, FieldMapping][]
+    const schemaMapping = Object.entries(this.schema)
     const isSingleColumn = Object.values(this.schema).length === 1
     let transformedRow = schemaMapping.map(( [columnLabel, mapping] ) => {
       let outputValue = row[columnLabel]
@@ -220,16 +222,20 @@ export default class FacebookCustomerMatchExecutor {
     return transformedRow
   }
 
+  private createUploadSessionObject(batchSequence: number, finalBatch: boolean, totalRows?:number): UserUploadSession {
+    return {
+      "session_id": this.sessionId, 
+      "batch_seq":batchSequence, 
+      "last_batch_flag": finalBatch, 
+      "estimated_num_total": totalRows 
+    }
+  }
   // TODO Uncomment when needed
-  // private getAPIFormattedSchema() {
-  //   if(this.schema && this.isSchemaDetermined) {
-  //     if(Object.values(this.schema).length === 1) {
-  //       return Object.values(this.schema)[0] // unwrap an array of one entry, per facebook docs
-  //     }
-  //     return Object.values(this.schema).map((fieldMapping) => fieldMapping.facebookAPIName)
-  //   }
-  //   return null
-  // }
+  private getAPIFormattedSchema(): string | string[] {
+    const fieldMapping: FieldMapping[] = Object.values(this.schema)
+    const formattedSchema = fieldMapping.map((fieldMapping) => fieldMapping.facebookAPIName)
+    return (Object.values(this.schema).length === 1) ? formattedSchema[0] : formattedSchema // unwrap an array of one entry, per facebook docs
+  }
 
   private hash(rawValue: string) {
     return crypto.createHash("sha256").update(rawValue).digest("hex")
@@ -257,9 +263,15 @@ export default class FacebookCustomerMatchExecutor {
       return;
     }
     const {batchSequence, data : currentBatch , finalBatch} = this.batchQueue.shift();
-    console.log(batchSequence, currentBatch, finalBatch);
+    const sessionParameter = this.createUploadSessionObject(batchSequence, finalBatch)
+    const payloadParameter: UserUploadPayload = {
+      schema: this.getAPIFormattedSchema(),
+      data: currentBatch,
+    };
     this.currentRequest = new Promise<void>((resolve) => {
-      this.log("Pretending to send current batch: ", JSON.stringify(currentBatch));
+      this.log("Pretending to send current batch: ");
+      this.log(JSON.stringify(sessionParameter))
+      this.log(JSON.stringify(payloadParameter))
       resolve();
     });
     await this.currentRequest;

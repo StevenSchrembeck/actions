@@ -8,14 +8,14 @@ export const customer_list_source_types = { // Used by Facebook for unknown purp
     BOTH_USER_AND_PARTNER_PROVIDED: "BOTH_USER_AND_PARTNER_PROVIDED"
 }
 export interface UserUploadSession {
-    "session_id": number, 
+    "session_id": string, 
     "batch_seq":number, 
     "last_batch_flag": boolean, 
-    "estimated_num_total": number 
+    "estimated_num_total"?: number
 }
 
 export interface UserUploadPayload {
-    "schema": UserSchema | UserSchema[],
+    "schema": string | string[],
     "data": string[] | string[][],
 }
 
