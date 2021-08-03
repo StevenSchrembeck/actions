@@ -25,6 +25,7 @@ export default class FacebookCustomerMatchExecutor {
   private isSchemaDetermined = false
   private rowQueue: any[] = []
   private schema: {[s: string]: object} = {}
+  private batchIncrement: number = 0
 
   constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean) {
     this.actionRequest = actionRequest
@@ -207,8 +208,9 @@ export default class FacebookCustomerMatchExecutor {
       if (!outputValue) {
         return ""
       }
+      outputValue = this.normalize(outputValue)
       if (this.doHashingBool && mapping.shouldHash) {
-        outputValue = this.normalizeAndHash(outputValue) // TODO separate normalization from hashing
+        outputValue = this.hash(outputValue) // TODO separate normalization from hashing
       }
       // TODO do formatting conversion here
       return outputValue
@@ -223,17 +225,23 @@ export default class FacebookCustomerMatchExecutor {
   //   return null
   // }
 
-  private normalizeAndHash(rawValue: string) {
-    const normalized = rawValue.trim().toLowerCase()
-    const hashed = crypto.createHash("sha256").update(normalized).digest("hex")
-    return hashed
+  private hash(rawValue: string) {
+    return crypto.createHash("sha256").update(rawValue).digest("hex")
+  }
+  private normalize(rawValue: string) {
+    return rawValue.trim().toLowerCase()
   }
 
-  private scheduleBatch(force = false) {
-    if ( !this.batchIsReady && !force ) {
+  private scheduleBatch(finalBatch = false) {
+    if ( !this.batchIsReady && !finalBatch ) {
       return
     }
-    const batch = this.rowQueue.splice(0, BATCH_SIZE - 1)
+    this.batchIncrement += 1
+    const batch = {
+      data: this.rowQueue.splice(0, BATCH_SIZE - 1),
+      batchCount: this.batchIncrement,
+      finalBatch
+    }
     this.batchQueue.push(batch)
     this.batchPromises.push(this.sendBatch())
   }
@@ -242,7 +250,8 @@ export default class FacebookCustomerMatchExecutor {
     if (this.currentRequest !== undefined || this.batchQueue.length === 0) {
       return;
     }
-    const currentBatch = this.batchQueue.shift();
+    const {batchCount, data : currentBatch , finalBatch} = this.batchQueue.shift();
+    console.log(batchCount, currentBatch, finalBatch);
     this.currentRequest = new Promise<void>((resolve) => {
       this.log("Pretending to send current batch: ", JSON.stringify(currentBatch));
       resolve();
