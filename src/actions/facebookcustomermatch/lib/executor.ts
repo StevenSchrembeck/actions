@@ -1,11 +1,20 @@
 import * as Hub from "../../../hub";
 
 import * as crypto from "crypto"
-import * as lodash from "lodash"
 import * as oboe from "oboe"
 import { Readable } from "stream"
 
+import {UserSchema} from "./api"
+
 const BATCH_SIZE = 10000; // Maximum size allowable by Facebook endpoint
+
+interface FieldMapping {
+  lookMLFieldName: string,
+  fallbackRegex: any,
+  shouldHash: boolean,
+  facebookAPIName: UserSchema,
+}
+
 // TODO move to separate files once ready
 export default class FacebookCustomerMatchExecutor {
   private actionRequest: Hub.ActionRequest
@@ -15,7 +24,7 @@ export default class FacebookCustomerMatchExecutor {
   private currentRequest: Promise<any> | undefined
   private isSchemaDetermined = false
   private rowQueue: any[] = []
-  private schema: {[s: string]: string} = {}
+  private schema: {[s: string]: object} = {}
 
   constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean) {
     this.actionRequest = actionRequest
@@ -32,15 +41,25 @@ export default class FacebookCustomerMatchExecutor {
    * Parsed result: [{"hashed_email": "lukeperry@example.com"}, {"address_info": {"postal_code": "90210"}}]
    *                                   ^^^^^^^ Except the email could actually be a hash
    */
-  private regexes = [
-    [/email/i, "hashed_email"],
-    [/phone/i, "hashed_phone_number"],
-    [/first/i, "address_info.hashed_first_name"],
-    [/last/i, "address_info.hashed_last_name"],
-    [/city/i, "address_info.city"],
-    [/state/i, "address_info.state"],
-    [/country/i, "address_info.country_code"],
-    [/postal|zip/i, "address_info.postal_code"],
+  // private regexes = [
+  //   [/email/i, "hashed_email"],
+  //   [/phone/i, "hashed_phone_number"],
+  //   [/first/i, "address_info.hashed_first_name"],
+  //   [/last/i, "address_info.hashed_last_name"],
+  //   [/city/i, "address_info.city"],
+  //   [/state/i, "address_info.state"],
+  //   [/country/i, "address_info.country_code"],
+  //   [/postal|zip/i, "address_info.postal_code"],
+  // ]
+  
+
+  private fieldMapping : FieldMapping[] = [
+    {
+      lookMLFieldName: "Email",
+      fallbackRegex: /email/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.email
+    }
   ]
 
   private get batchIsReady() {
@@ -92,12 +111,16 @@ export default class FacebookCustomerMatchExecutor {
     })
   }
 
+  // TODO include LookML field tags (if any) in arguments to this function or as part of "row"
   private determineSchema(row: any) {
     for (const columnLabel of Object.keys(row)) {
-      for (const mapping of this.regexes) {
-        const [regex, outputPath] = mapping
-        if (columnLabel.match(regex)) {
-          this.schema[columnLabel] = outputPath as string
+      for (const mapping of this.fieldMapping) {
+        // TODO lookup LookML field tags to see if they match.
+        // doing straight regex for now
+        const {fallbackRegex} = mapping
+
+        if(columnLabel.match(fallbackRegex)) {
+          this.schema[columnLabel] = mapping
         }
       }
     }
@@ -110,22 +133,34 @@ export default class FacebookCustomerMatchExecutor {
     this.rowQueue.push(...output)
   }
 
+
+  /* 
+    Transforms a row of Looker data into a row of data formatted for the Facebook marketing API.
+    Missing data is filled in with empty strings to maintain array order.
+  */
   private transformRow(row: any) {
-    const schemaMapping = Object.entries(this.schema)
-    const outputCells = schemaMapping.map(( [columnLabel, outputPath] ) => {
+    const schemaMapping = Object.entries(this.schema) as [string, FieldMapping][]
+    return schemaMapping.map(( [columnLabel, mapping] ) => {
       let outputValue = row[columnLabel]
       if (!outputValue) {
-        return null
+        return ""
       }
-      if (this.doHashingBool && outputPath.includes("hashed")) {
-        outputValue = this.normalizeAndHash(outputValue)
+      if (this.doHashingBool && mapping.shouldHash) {
+        outputValue = this.normalizeAndHash(outputValue) // TODO separate normalization from hashing
       }
-      return lodash.set({} as any, outputPath, outputValue)
+      // TODO do formatting conversion here
+      return outputValue
     })
-    return outputCells.filter(Boolean)
   }
 
-  // Formatting guidelines: https://support.google.com/google-ads/answer/7476159?hl=en
+  // TODO Uncomment when needed
+  // private getAPIFormattedSchema() {
+  //   if(this.schema && this.isSchemaDetermined) {
+  //     return Object.values(this.schema).map((fieldMapping) => fieldMapping.facebookAPIName)
+  //   }
+  //   return null
+  // }
+
   private normalizeAndHash(rawValue: string) {
     const normalized = rawValue.trim().toLowerCase()
     const hashed = crypto.createHash("sha256").update(normalized).digest("hex")
@@ -141,9 +176,6 @@ export default class FacebookCustomerMatchExecutor {
     this.batchPromises.push(this.sendBatch())
   }
 
-  // The Ads API seems to generate a concurrent modification exception if we have multiple
-  // addDataJobOperations requests in progress at one time. So we use this funky solution
-  // to run one at a time, without having to refactor the streaming parser and everything too.
   private async sendBatch(): Promise<void> {
     if (this.currentRequest !== undefined || this.batchQueue.length === 0) {
       return;

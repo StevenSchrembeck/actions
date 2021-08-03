@@ -125,7 +125,7 @@ export default class FacebookCustomerMatchApi {
         const appendUrl = `${customAudienceId}/users`
         const response = await this.apiCall("POST", appendUrl, {
             session,
-            data: payload,
+            payload,
         })
         return response.data
     }
@@ -134,7 +134,7 @@ export default class FacebookCustomerMatchApi {
         const appendUrl = `${customAudienceId}/usersreplace`
         const response = await this.apiCall("POST", appendUrl, {
             session,
-            data: payload,
+            payload,
         })
         return response.data
     }
