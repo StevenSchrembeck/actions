@@ -30,7 +30,7 @@ export enum UserSchema { // all lower case all the time
     firstName = "FN_SHA256",
     firstInitial = "FI_SHA256",
     city = "CT_SHA256", //a-z only, lowercase, no punctuation, no whitespace, no special characters
-    st = "ST_SHA256", // 2 character ANSI abbreviation code https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code
+    state = "ST_SHA256", // 2 character ANSI abbreviation code https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code
     zip = "ZIP_SHA256", // in US i.e. 30008, in UK Area/District/Sector format
     country = "COUNTRY_SHA256", // 2 letter codes https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
     madid = "MADID", // all lowercase, keep hyphens 

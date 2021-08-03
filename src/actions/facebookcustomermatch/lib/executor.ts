@@ -30,28 +30,6 @@ export default class FacebookCustomerMatchExecutor {
     this.actionRequest = actionRequest
     this.doHashingBool = doHashingBool
   }
-  /*
-   * If the Looker column label matches the regex, that label will be added to the schema object
-   * with its value set to the corresponding output property path given below.
-   * Then when subsequent rows come through, we use the schema object keys to get the columns we care about,
-   * and put those values into the corresponding output path, as given by the schema object values.
-   *
-   * Example 1st row: {"User Email Address": "lukeperry@example.com", "US Zipcode": "90210"}
-   * Schema object: {"User Email Address": "hashed_email", "US Zipcode": "address_info.postal_code"}
-   * Parsed result: [{"hashed_email": "lukeperry@example.com"}, {"address_info": {"postal_code": "90210"}}]
-   *                                   ^^^^^^^ Except the email could actually be a hash
-   */
-  // private regexes = [
-  //   [/email/i, "hashed_email"],
-  //   [/phone/i, "hashed_phone_number"],
-  //   [/first/i, "address_info.hashed_first_name"],
-  //   [/last/i, "address_info.hashed_last_name"],
-  //   [/city/i, "address_info.city"],
-  //   [/state/i, "address_info.state"],
-  //   [/country/i, "address_info.country_code"],
-  //   [/postal|zip/i, "address_info.postal_code"],
-  // ]
-  
 
   private fieldMapping : FieldMapping[] = [
     {
@@ -59,7 +37,91 @@ export default class FacebookCustomerMatchExecutor {
       fallbackRegex: /email/i,
       shouldHash: true,
       facebookAPIName: UserSchema.email
-    }
+    },
+    {
+      lookMLFieldName: "Phone",
+      fallbackRegex: /phone/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.phone
+    },
+    {
+      lookMLFieldName: "Gender",
+      fallbackRegex: /gender/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.gender
+    },
+    {
+      lookMLFieldName: "BirthYear",
+      fallbackRegex: /year/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.birthYear
+    },
+    {
+      lookMLFieldName: "BirthMonth",
+      fallbackRegex: /month/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.birthMonth
+    },
+    {
+      lookMLFieldName: "BirthDay",
+      fallbackRegex: /day/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.birthDay
+    },
+    {
+      lookMLFieldName: "LastName",
+      fallbackRegex: /last/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.lastName
+    },
+    {
+      lookMLFieldName: "FirstName",
+      fallbackRegex: /first/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.firstName
+    },
+    {
+      lookMLFieldName: "FirstInitial",
+      fallbackRegex: /initial/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.firstInitial
+    },
+    {
+      lookMLFieldName: "City",
+      fallbackRegex: /city/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.city
+    },
+    {
+      lookMLFieldName: "State",
+      fallbackRegex: /state/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.state
+    },
+    {
+      lookMLFieldName: "Zip",
+      fallbackRegex: /postal|zip/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.zip
+    },
+    {
+      lookMLFieldName: "Country",
+      fallbackRegex: /country/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.country
+    },
+    {
+      lookMLFieldName: "MadID",
+      fallbackRegex: /madid/i,
+      shouldHash: false,
+      facebookAPIName: UserSchema.madid
+    },
+    {
+      lookMLFieldName: "ExternalID",
+      fallbackRegex: /external/i,
+      shouldHash: true,
+      facebookAPIName: UserSchema.externalId
+    },
   ]
 
   private get batchIsReady() {
