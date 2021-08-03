@@ -4,9 +4,9 @@ import * as crypto from "crypto"
 import * as oboe from "oboe"
 import { Readable } from "stream"
 
-import {UserSchema} from "./api"
+import {UserSchema, UserUploadSession, UserUploadPayload} from "./api"
 
-const BATCH_SIZE = 10000; // Maximum size allowable by Facebook endpoint
+const BATCH_SIZE = 3; // Maximum size allowable by Facebook endpoint
 
 interface FieldMapping {
   lookMLFieldName: string,
@@ -25,7 +25,7 @@ export default class FacebookCustomerMatchExecutor {
   private isSchemaDetermined = false
   private rowQueue: any[] = []
   private schema: {[s: string]: object} = {}
-  private batchIncrement: number = 0
+  private batchIncrementer: number = 0
 
   constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean) {
     this.actionRequest = actionRequest
@@ -203,7 +203,8 @@ export default class FacebookCustomerMatchExecutor {
   */
   private transformRow(row: any) {
     const schemaMapping = Object.entries(this.schema) as [string, FieldMapping][]
-    return schemaMapping.map(( [columnLabel, mapping] ) => {
+    const isSingleColumn = Object.values(this.schema).length === 1
+    let transformedRow = schemaMapping.map(( [columnLabel, mapping] ) => {
       let outputValue = row[columnLabel]
       if (!outputValue) {
         return ""
@@ -215,11 +216,16 @@ export default class FacebookCustomerMatchExecutor {
       // TODO do formatting conversion here
       return outputValue
     })
+    transformedRow = isSingleColumn ? transformedRow : [transformedRow]; // unwrap an array of one entry, per facebook docs
+    return transformedRow
   }
 
   // TODO Uncomment when needed
   // private getAPIFormattedSchema() {
   //   if(this.schema && this.isSchemaDetermined) {
+  //     if(Object.values(this.schema).length === 1) {
+  //       return Object.values(this.schema)[0] // unwrap an array of one entry, per facebook docs
+  //     }
   //     return Object.values(this.schema).map((fieldMapping) => fieldMapping.facebookAPIName)
   //   }
   //   return null
@@ -236,10 +242,10 @@ export default class FacebookCustomerMatchExecutor {
     if ( !this.batchIsReady && !finalBatch ) {
       return
     }
-    this.batchIncrement += 1
+    this.batchIncrementer += 1
     const batch = {
       data: this.rowQueue.splice(0, BATCH_SIZE - 1),
-      batchCount: this.batchIncrement,
+      batchSequence: this.batchIncrementer,
       finalBatch
     }
     this.batchQueue.push(batch)
@@ -250,8 +256,8 @@ export default class FacebookCustomerMatchExecutor {
     if (this.currentRequest !== undefined || this.batchQueue.length === 0) {
       return;
     }
-    const {batchCount, data : currentBatch , finalBatch} = this.batchQueue.shift();
-    console.log(batchCount, currentBatch, finalBatch);
+    const {batchSequence, data : currentBatch , finalBatch} = this.batchQueue.shift();
+    console.log(batchSequence, currentBatch, finalBatch);
     this.currentRequest = new Promise<void>((resolve) => {
       this.log("Pretending to send current batch: ", JSON.stringify(currentBatch));
       resolve();
