@@ -83,7 +83,6 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   async oauthFetchInfo(urlParams: { [key: string]: string }, redirectUri: string) {
     let plaintext
     
-    debugger;
     try {
       const actionCrypto = new Hub.ActionCrypto()
       plaintext = await actionCrypto.decrypt(urlParams.state)
