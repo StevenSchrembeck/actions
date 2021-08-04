@@ -25,6 +25,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   readonly oauthClientId: string
   readonly oauthClientSecret: string
+  readonly oauthScope: string = "read_insights,ads_management,ads_rea,business_management,public_profile"
 
   constructor(oauthClientId: string, oauthClientSecret: string) {
     super()
@@ -74,6 +75,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       client_id: process.env.FACEBOOK_CLIENT_ID,
       redirect_uri: redirectUri,
       state: encryptedState,
+      scope: this.oauthScope
     })    
     return url.toString()
   }
@@ -91,7 +93,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     const payload = JSON.parse(plaintext)
     
     // adding our app secret to the mix gives us a long-lived token (which lives ~60 days) instead of short-lived token
-    const longLivedTokenRequestUri = `https://graph.facebook.com/v11.0/oauth/access_token?client_id=${this.oauthClientId}&redirect_uri=${redirectUri}&client_secret=${this.oauthClientSecret}&code=${urlParams.code}&scope=read_insights%2Cads_management%2Cads_read%2Cbusiness_management%2Cpublic_profile`;
+    const longLivedTokenRequestUri = `https://graph.facebook.com/v11.0/oauth/access_token?client_id=${this.oauthClientId}&redirect_uri=${redirectUri}&client_secret=${this.oauthClientSecret}&code=${urlParams.code}`;
     const longLivedTokenResponse = await gaxios.request<any>({method: 'GET', url: longLivedTokenRequestUri})
     
     const longLivedToken = longLivedTokenResponse.data.access_token;
