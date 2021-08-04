@@ -160,7 +160,6 @@ export default class FacebookCustomerMatchApi {
             customer_file_source,
             subtype: "CUSTOM"
         })
-        console.log(response)
         return response.id
     }
 
@@ -170,7 +169,6 @@ export default class FacebookCustomerMatchApi {
             session,
             payload,
         })
-        console.log(response)
         return response.data
     }
 
@@ -180,7 +178,6 @@ export default class FacebookCustomerMatchApi {
             session,
             payload,
         })
-        console.log(response)
         return response.data
     }
 
@@ -196,6 +193,7 @@ export default class FacebookCustomerMatchApi {
             data,
             baseURL: API_BASE_URL,
         }).catch((err) => {
+            console.log(err)
             // TODO clean up this code. It can still leak access tokens if facebook replies with: "400 bad request, here's what you sent me!"
             sanitizeError(err)
             if(err && err.response && err.response.data && err.response.data.error && err.response.data.error.message) {
