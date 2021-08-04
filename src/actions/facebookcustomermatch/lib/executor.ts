@@ -145,6 +145,7 @@ export default class FacebookCustomerMatchExecutor {
 
 
   async run() {
+    console.log("Final form params are: " + JSON.stringify(this.actionRequest.formParams))
     try {
       // The ActionRequest.prototype.stream() method is going to await the callback we pass
       // and either resolve the result we return here, or reject with an error from anywhere
