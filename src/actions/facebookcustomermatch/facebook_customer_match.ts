@@ -36,6 +36,8 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   async execute(hubRequest: Hub.ActionRequest) {
     let response = new Hub.ActionResponse()
     const accessToken = this.getAccessTokenFromRequest(hubRequest)
+    debugger;
+    
     if(!accessToken) {
       response.state = new Hub.ActionState()
       response.state.data = "reset"
