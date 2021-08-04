@@ -4,7 +4,6 @@ import FacebookCustomerMatchApi from "./api";
 export default class FacebookFormBuilder {
 
     async generateActionForm(actionRequest: Hub.ActionRequest, facebookApi: FacebookCustomerMatchApi) {
-      console.log(facebookApi)
       console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
 
       let businesses:{name: string, id: string}[] = []
@@ -14,31 +13,7 @@ export default class FacebookFormBuilder {
       businesses = await facebookApi.getBusinessAccountIds()
       adAccounts = await facebookApi.getAdAccountsForBusiness(businesses[0].id)
       customAudiences = await facebookApi.getCustomAudiences(adAccounts[0].id)
-      // businesses = [
-      //   {
-      //       "id": "497949387983810",
-      //       "name": "Webcraft LLC"
-      //   },
-      //   {
-      //       "id": "104000287081747",
-      //       "name": "4 Mile Analytics"
-      //   }
-      // ]
-      // adAccounts = [
-      //   {
-      //   "name": "Test Ad Account 1",
-      //   "id": "114109700789636",
-      //   }
-      // ]
-      // customAudiences = [
-      //   {
-      //   "name": "My new Custom Audience",
-      //   "id": "23847792490850535"
-      //   }
-      // ]
       
-      
-
       if(actionRequest.formParams.choose_business === "reset") {
         actionRequest.formParams = {}
       }

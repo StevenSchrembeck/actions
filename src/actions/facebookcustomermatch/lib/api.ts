@@ -193,15 +193,15 @@ export default class FacebookCustomerMatchApi {
           data,
           baseURL: API_BASE_URL,
         }).catch((err) => {
-            debugger;
+            // TODO clean up this code. It can still leak access tokens if facebook replies with: "400 bad request, here's what you sent me!"
             sanitizeError(err)
+            if(err && err.response && err.response.data && err.response.data.error && err.response.data.error.message) {
+                console.log("Facebook error message was: " + err.response.data.error.message.replace)
+            }
             // Note that the access token is intentionally omitted from this log
-            console.error(`Error in network request ${method} ${url} with parameters: ${typeof data === 'object' && JSON.stringify(data)}. Complete error was: ${err}`)
+            console.error(`Error in network request ${method} ${url} with parameters: ${typeof data === 'object' && JSON.stringify(data)}.`)
         })
-        console.log(response)
-        if(response && response.data && response.data.error && response.data.error.message) {
-            console.log("Facebook error message was: " + response.data.error.message)
-        }
+        
   
         return response && response.data
       }
