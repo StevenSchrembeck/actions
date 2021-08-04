@@ -160,7 +160,8 @@ export default class FacebookCustomerMatchApi {
             customer_file_source,
             subtype: "CUSTOM"
         })
-        return response.data.id
+        console.log(response)
+        return response.id
     }
 
     async appendUsersToCustomAudience(customAudienceId: string, session: UserUploadSession, payload: UserUploadPayload ) {
@@ -169,6 +170,7 @@ export default class FacebookCustomerMatchApi {
             session,
             payload,
         })
+        console.log(response)
         return response.data
     }
 
@@ -178,6 +180,7 @@ export default class FacebookCustomerMatchApi {
             session,
             payload,
         })
+        console.log(response)
         return response.data
     }
 
