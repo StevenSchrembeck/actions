@@ -184,7 +184,7 @@ export default class FacebookCustomerMatchApi {
 
     async apiCall(method: "GET" | "POST", url: string, data?: any) {
         let queryParamCharacter = "?"
-        if (url.indexOf("?")) { // don't use two question marks if the url already contains query parameters
+        if (url.indexOf("?") >= 0) { // don't use two question marks if the url already contains query parameters
             queryParamCharacter = "&"
         }
         const response = await gaxios.request<any>({
@@ -198,7 +198,7 @@ export default class FacebookCustomerMatchApi {
             // Note that the access token is intentionally omitted from this log
             console.error(`Error in network request ${method} ${url} with parameters: ${typeof data === 'object' && JSON.stringify(data)}. Complete error was: ${err}`)
         })
-        debugger;
+        console.log(response)
         if(response && response.data && response.data.error && response.data.error.message) {
             console.log("Facebook error message was: " + response.data.error.message)
         }
