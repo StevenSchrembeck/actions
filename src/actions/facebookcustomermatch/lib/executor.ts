@@ -300,6 +300,7 @@ OUT
       }
       return transformFunction(formattedRow) || ""
     })
+    debugger;
     return transformedRow.length === 1 ? transformedRow[0] : transformedRow; // unwrap an array of one entry, per facebook docs
   }
 
