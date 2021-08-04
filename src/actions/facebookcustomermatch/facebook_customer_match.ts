@@ -25,7 +25,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   readonly oauthClientId: string
   readonly oauthClientSecret: string
-  readonly oauthScope: string = "read_insights,ads_management,ads_rea,business_management,public_profile"
+  readonly oauthScope: string = "read_insights,ads_management,ads_read,business_management,public_profile"
 
   constructor(oauthClientId: string, oauthClientSecret: string) {
     super()
@@ -82,6 +82,8 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   async oauthFetchInfo(urlParams: { [key: string]: string }, redirectUri: string) {
     let plaintext
+    
+    debugger;
     try {
       const actionCrypto = new Hub.ActionCrypto()
       plaintext = await actionCrypto.decrypt(urlParams.state)
