@@ -283,7 +283,7 @@ OUT
 
   private handleRow(row: any) {
     const output = this.transformRow(row)
-    this.rowQueue.push(...output)
+    this.rowQueue.push(output)
   }
 
   /* 
@@ -300,7 +300,6 @@ OUT
       }
       return transformFunction(formattedRow) || ""
     })
-    debugger;
     return transformedRow.length === 1 ? transformedRow[0] : transformedRow; // unwrap an array of one entry, per facebook docs
   }
 
