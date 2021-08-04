@@ -193,10 +193,12 @@ export default class FacebookCustomerMatchApi {
           data,
           baseURL: API_BASE_URL,
         }).catch((err) => {
+            debugger;
             sanitizeError(err)
             // Note that the access token is intentionally omitted from this log
             console.error(`Error in network request ${method} ${url} with parameters: ${typeof data === 'object' && JSON.stringify(data)}. Complete error was: ${err}`)
         })
+        debugger;
         if(response && response.data && response.data.error && response.data.error.message) {
             console.log("Facebook error message was: " + response.data.error.message)
         }
