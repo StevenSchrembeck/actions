@@ -169,16 +169,16 @@ export default class FacebookCustomerMatchApi {
             session,
             payload,
         })
-        return response.data
+        return response
     }
 
     async replaceUsersInCustomAudience(customAudienceId: string, session: UserUploadSession, payload: UserUploadPayload ) {
-        const appendUrl = `${customAudienceId}/usersreplace`
-        const response = await this.apiCall("POST", appendUrl, {
+        const replaceUrl = `${customAudienceId}/usersreplace`
+        const response = await this.apiCall("POST", replaceUrl, {
             session,
             payload,
         })
-        return response.data
+        return response
     }
 
 
@@ -197,7 +197,8 @@ export default class FacebookCustomerMatchApi {
             // TODO clean up this code. It can still leak access tokens if facebook replies with: "400 bad request, here's what you sent me!"
             sanitizeError(err)
             if(err && err.response && err.response.data && err.response.data.error && err.response.data.error.message) {
-                console.log("Facebook error message was: " + err.response.data.error.message.replace)
+                console.log("Facebook error message was: " + err.response.data.error.message)
+                console.log("Facebook user friendly message was: " + err.response.data.error_user_msg)
             }
             // Note that the access token is intentionally omitted from this log
             console.error(`Error in network request ${method} ${url} with parameters: ${typeof data === 'object' && JSON.stringify(data)}.`)
