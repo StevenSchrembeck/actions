@@ -359,6 +359,7 @@ OUT
       resolve();
     });
 
+    console.log(this.facebookAPI)
     //                                                   TODO UNHARDCODE \/
     // this.currentRequest = this.facebookAPI.appendUsersToCustomAudience("23847998265740535", sessionParameter, payloadParameter)
     await this.currentRequest;
