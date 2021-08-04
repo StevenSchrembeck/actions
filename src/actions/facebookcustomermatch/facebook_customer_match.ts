@@ -15,7 +15,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   readonly iconName = "facebookcustomermatch/facebook_ads_icon.png"
   readonly description = "TODO."
   readonly supportedActionTypes = [Hub.ActionType.Query]
-  readonly supportedFormats = [Hub.ActionFormat.JsonLabel]
+  readonly supportedFormats = [Hub.ActionFormat.JsonDetail]
   readonly supportedFormattings = [Hub.ActionFormatting.Unformatted]
   readonly supportedVisualizationFormattings = [Hub.ActionVisualizationFormatting.Noapply]
   readonly supportedDownloadSettings = [Hub.ActionDownloadSettings.Url]
@@ -37,7 +37,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     let response = new Hub.ActionResponse()
     const accessToken = this.getAccessTokenFromRequest(hubRequest)
     debugger;
-    
+
     if(!accessToken) {
       response.state = new Hub.ActionState()
       response.state.data = "reset"
@@ -46,7 +46,8 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       return response
     }
     const executor = new FacebookCustomerMatchExecutor(hubRequest, accessToken)
-    await executor.run()
+    //await executor.run()
+    console.log(executor)
     return response;
   }
 
