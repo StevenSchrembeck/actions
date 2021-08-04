@@ -15,7 +15,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   readonly iconName = "facebookcustomermatch/facebook_ads_icon.png"
   readonly description = "TODO."
   readonly supportedActionTypes = [Hub.ActionType.Query]
-  readonly supportedFormats = [Hub.ActionFormat.JsonDetail]
+  readonly supportedFormats = [Hub.ActionFormat.JsonLabel]
   readonly supportedFormattings = [Hub.ActionFormatting.Unformatted]
   readonly supportedVisualizationFormattings = [Hub.ActionVisualizationFormatting.Noapply]
   readonly supportedDownloadSettings = [Hub.ActionDownloadSettings.Url]

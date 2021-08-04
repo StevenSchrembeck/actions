@@ -201,8 +201,7 @@ export default class FacebookCustomerMatchExecutor {
   private async startAsyncParser(downloadStream: Readable) {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
-        .node("!.*", (row: any) => {
-          debugger;
+        .node("!.*", (row: any) => {          
           if (!this.isSchemaDetermined) {
             this.determineSchema(row)
           }
@@ -390,23 +389,22 @@ OUT
       data: currentBatch,
     };
 
-    console.log(this.customAudienceId)
-    this.currentRequest = new Promise<void>((resolve) => {
-      this.log("Pretending to send current batch: ");
-      this.log(JSON.stringify(sessionParameter))
-      this.log(JSON.stringify(payloadParameter))
-      resolve();
-    });
+    // this.currentRequest = new Promise<void>((resolve) => {
+    //   this.log("Pretending to send current batch: ");
+    //   this.log(JSON.stringify(sessionParameter))
+    //   this.log(JSON.stringify(payloadParameter))
+    //   resolve();
+    // });
 
     // console.log(this.facebookAPI)    
-    // let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience.bind(this.facebookAPI)
-    // if(this.operationType === "replace_audience") {
-    //   apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience.bind(this.facebookAPI)
-    // }
-    // if(!this.customAudienceId) {
-    //   throw new Error("Could not upload users because customAudienceId was missing.")
-    // }
-    // this.currentRequest = apiMethodToCall(this.customAudienceId, sessionParameter, payloadParameter)
+    let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience.bind(this.facebookAPI)
+    if(this.operationType === "replace_audience") {
+      apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience.bind(this.facebookAPI)
+    }
+    if(!this.customAudienceId) {
+      throw new Error("Could not upload users because customAudienceId was missing.")
+    }
+    this.currentRequest = apiMethodToCall(this.customAudienceId, sessionParameter, payloadParameter)
     await this.currentRequest;
     this.currentRequest = undefined;
     return this.sendBatch();
