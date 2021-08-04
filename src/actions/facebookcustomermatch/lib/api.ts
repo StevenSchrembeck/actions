@@ -152,7 +152,7 @@ export default class FacebookCustomerMatchApi {
         return namesAndIds
     }
 
-    async createCustomAudience(adAccountId: string, name: string, description:string = "", customer_file_source: any = customer_list_source_types.USER_PROVIDED_ONLY) {
+    async createCustomAudience(adAccountId: string, name: string, description:string = "", customer_file_source: any = customer_list_source_types.USER_PROVIDED_ONLY): Promise<string> {
         const createCustomAudienceUrl = `act_${adAccountId}/customaudiences`
         const response = await this.apiCall("POST", createCustomAudienceUrl, {
             name,
@@ -160,7 +160,7 @@ export default class FacebookCustomerMatchApi {
             customer_file_source,
             subtype: "CUSTOM"
         })
-        return response.data
+        return response.data.id
     }
 
     async appendUsersToCustomAudience(customAudienceId: string, session: UserUploadSession, payload: UserUploadPayload ) {

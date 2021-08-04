@@ -19,7 +19,6 @@ interface FieldMapping {
 // TODO move to separate files once ready
 export default class FacebookCustomerMatchExecutor {
   private actionRequest: Hub.ActionRequest
-  private doHashingBool: boolean = true
   private batchPromises: Promise<void>[] = []
   private batchQueue: any[] = []
   private currentRequest: Promise<any> | undefined
@@ -30,12 +29,39 @@ export default class FacebookCustomerMatchExecutor {
   private batchIncrementer: number = 0
   private sessionId: number
   private facebookAPI: FacebookCustomerMatchApi
+  
+  // form params
+  private shouldHash: boolean = true
+  private operationType: string
+  private adAccountId: string
+  private customAudienceId: string | undefined = ""
+  private customAudienceName: string | undefined = ""
+  private customAudienceDescription: string | undefined = ""
 
-  constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean, accessToken: string) {
+  constructor(actionRequest: Hub.ActionRequest, accessToken: string) {
     this.actionRequest = actionRequest
-    this.doHashingBool = doHashingBool
     this.sessionId =  Date.now() // a unique id used to associate multiple requests with one custom audience API action
     this.facebookAPI = new FacebookCustomerMatchApi(accessToken)
+    this.shouldHash = actionRequest.formParams.should_hash === "do_no_hashing" ? false : true
+    const operationType = actionRequest.formParams.choose_create_update_replace
+    if(!operationType) {
+      throw new Error("Cannot execute action without choosing an operation type.")
+    }
+    this.operationType = operationType
+
+    if(!actionRequest.formParams.choose_business || !actionRequest.formParams.choose_ad_account) {
+      throw new Error("Cannot execute action without business id or ad account id.")
+    }
+    if(!actionRequest.formParams.choose_custom_audience && (
+      operationType === "update_audience" || operationType === "replace_audience"
+    )) {
+      throw new Error("Cannot update or replace without a custom audience id.")
+    }
+
+    this.adAccountId = actionRequest.formParams.choose_ad_account
+    this.customAudienceId = actionRequest.formParams.choose_custom_audience
+    this.customAudienceName = actionRequest.formParams.create_audience_name
+    this.customAudienceDescription = actionRequest.formParams.create_audience_description
   }
 
   private fieldMapping : FieldMapping[] = [
@@ -145,19 +171,17 @@ export default class FacebookCustomerMatchExecutor {
 
 
   async run() {
-    /* SAMPLE TODO delete
-      {
-        "choose_business": "497949387983810",
-        "choose_ad_account": "114109700789636",
-        "choose_create_update_replace": "create_audience",
-        "should_hash": "do_no_hashing",
-        "choose_custom_audience": "23847998265740535",
-        "create_audience_name": "testing1name",
-        "create_audience_description": "descriptionhere",
-        "format": "json_label"
-      }
-    */
     console.log("Final form params are: " + JSON.stringify(this.actionRequest.formParams))
+    if (this.operationType === "create_audience") {
+      if(!this.customAudienceName || !this.customAudienceDescription) {
+        throw new Error("Cannot create an audience if name or description are missing.")
+      }
+      const customAudienceId = await this.facebookAPI.createCustomAudience(this.adAccountId, this.customAudienceName, this.customAudienceDescription)
+      if(!customAudienceId || typeof customAudienceId !== "string") {
+        throw new Error("Failed to create audience. Cannot execute action.")
+      }
+      this.customAudienceId = customAudienceId
+    }
     try {
       // The ActionRequest.prototype.stream() method is going to await the callback we pass
       // and either resolve the result we return here, or reject with an error from anywhere
@@ -308,7 +332,7 @@ OUT
     const formattedRow = this.getFormattedRow(row, this.schema) // get a uniform object
     // turn our uniform object into X strings like doe_john_30008_1974. One per transform we have enough data for
     let transformedRow = this.matchedHashCombinations.map(([transformFunction, _facebookAPIFieldName]) => {
-      if (this.doHashingBool) {
+      if (this.shouldHash) {
         return this.hash(transformFunction(formattedRow)) || ""
       }
       return transformFunction(formattedRow) || ""
@@ -365,16 +389,22 @@ OUT
       data: currentBatch,
     };
 
-    this.currentRequest = new Promise<void>((resolve) => {
-      this.log("Pretending to send current batch: ");
-      this.log(JSON.stringify(sessionParameter))
-      this.log(JSON.stringify(payloadParameter))
-      resolve();
-    });
+    // this.currentRequest = new Promise<void>((resolve) => {
+    //   this.log("Pretending to send current batch: ");
+    //   this.log(JSON.stringify(sessionParameter))
+    //   this.log(JSON.stringify(payloadParameter))
+    //   resolve();
+    // });
 
-    console.log(this.facebookAPI)
-    //                                                   TODO UNHARDCODE \/
-    // this.currentRequest = this.facebookAPI.appendUsersToCustomAudience("23847998265740535", sessionParameter, payloadParameter)
+    // console.log(this.facebookAPI)    
+    let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience
+    if(this.operationType === "replace_audience") {
+      apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience
+    }
+    if(!this.customAudienceId) {
+      throw new Error("Could not upload users because customAudienceId was missing.")
+    }
+    this.currentRequest = apiMethodToCall(this.customAudienceId, sessionParameter, payloadParameter)
     await this.currentRequest;
     this.currentRequest = undefined;
     return this.sendBatch();
