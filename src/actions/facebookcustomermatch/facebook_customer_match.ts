@@ -36,7 +36,6 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   async execute(hubRequest: Hub.ActionRequest) {
     let response = new Hub.ActionResponse()
     const accessToken = this.getAccessTokenFromRequest(hubRequest)
-    debugger;
 
     if(!accessToken) {
       response.state = new Hub.ActionState()
@@ -46,8 +45,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       return response
     }
     const executor = new FacebookCustomerMatchExecutor(hubRequest, accessToken)
-    //await executor.run()
-    console.log(executor)
+    await executor.run()    
     return response;
   }
 

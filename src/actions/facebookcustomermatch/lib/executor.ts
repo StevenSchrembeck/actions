@@ -202,6 +202,7 @@ export default class FacebookCustomerMatchExecutor {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
         .node("!.*", (row: any) => {
+          debugger;
           if (!this.isSchemaDetermined) {
             this.determineSchema(row)
           }
@@ -389,22 +390,22 @@ OUT
       data: currentBatch,
     };
 
-    // this.currentRequest = new Promise<void>((resolve) => {
-    //   this.log("Pretending to send current batch: ");
-    //   this.log(JSON.stringify(sessionParameter))
-    //   this.log(JSON.stringify(payloadParameter))
-    //   resolve();
-    // });
+    this.currentRequest = new Promise<void>((resolve) => {
+      this.log("Pretending to send current batch: ");
+      this.log(JSON.stringify(sessionParameter))
+      this.log(JSON.stringify(payloadParameter))
+      resolve();
+    });
 
     // console.log(this.facebookAPI)    
-    let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience.bind(this.facebookAPI)
-    if(this.operationType === "replace_audience") {
-      apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience.bind(this.facebookAPI)
-    }
-    if(!this.customAudienceId) {
-      throw new Error("Could not upload users because customAudienceId was missing.")
-    }
-    this.currentRequest = apiMethodToCall(this.customAudienceId, sessionParameter, payloadParameter)
+    // let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience.bind(this.facebookAPI)
+    // if(this.operationType === "replace_audience") {
+    //   apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience.bind(this.facebookAPI)
+    // }
+    // if(!this.customAudienceId) {
+    //   throw new Error("Could not upload users because customAudienceId was missing.")
+    // }
+    // this.currentRequest = apiMethodToCall(this.customAudienceId, sessionParameter, payloadParameter)
     await this.currentRequest;
     this.currentRequest = undefined;
     return this.sendBatch();
