@@ -390,6 +390,7 @@ OUT
       data: currentBatch,
     };
 
+    console.log(this.customAudienceId)
     this.currentRequest = new Promise<void>((resolve) => {
       this.log("Pretending to send current batch: ");
       this.log(JSON.stringify(sessionParameter))
