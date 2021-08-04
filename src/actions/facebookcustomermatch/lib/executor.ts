@@ -28,13 +28,13 @@ export default class FacebookCustomerMatchExecutor {
   private rowQueue: any[] = []
   private schema: {[s: string]: FieldMapping} = {}
   private batchIncrementer: number = 0
-  private sessionId: string
+  private sessionId: number
   private facebookAPI: FacebookCustomerMatchApi
 
   constructor(actionRequest: Hub.ActionRequest, doHashingBool: boolean, accessToken: string) {
     this.actionRequest = actionRequest
     this.doHashingBool = doHashingBool
-    this.sessionId = "looker_customer_match_" + Date.now() // a unique id used to associate multiple requests with one custom audience API action
+    this.sessionId =  Date.now() // a unique id used to associate multiple requests with one custom audience API action
     this.facebookAPI = new FacebookCustomerMatchApi(accessToken)
   }
 
