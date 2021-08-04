@@ -59,7 +59,10 @@ export default class FacebookFormBuilder {
           default: "create_audience"
         })
       }
-      if (actionRequest.formParams.choose_create_update_replace === "create_audience") {
+      if (actionRequest.formParams.choose_ad_account && (
+        actionRequest.formParams.choose_create_update_replace === "create_audience"
+        || !actionRequest.formParams.choose_create_update_replace
+      )) {
         form.fields.push({
           label: "New audience name",
           name: "create_audience_name",          

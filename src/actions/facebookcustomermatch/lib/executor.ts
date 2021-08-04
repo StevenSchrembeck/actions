@@ -145,6 +145,18 @@ export default class FacebookCustomerMatchExecutor {
 
 
   async run() {
+    /* SAMPLE TODO delete
+      {
+        "choose_business": "497949387983810",
+        "choose_ad_account": "114109700789636",
+        "choose_create_update_replace": "create_audience",
+        "should_hash": "do_no_hashing",
+        "choose_custom_audience": "23847998265740535",
+        "create_audience_name": "testing1name",
+        "create_audience_description": "descriptionhere",
+        "format": "json_label"
+      }
+    */
     console.log("Final form params are: " + JSON.stringify(this.actionRequest.formParams))
     try {
       // The ActionRequest.prototype.stream() method is going to await the callback we pass
@@ -353,16 +365,16 @@ OUT
       data: currentBatch,
     };
 
-    // this.currentRequest = new Promise<void>((resolve) => {
-    //   this.log("Pretending to send current batch: ");
-    //   this.log(JSON.stringify(sessionParameter))
-    //   this.log(JSON.stringify(payloadParameter))
-    //   resolve();
-    // });
+    this.currentRequest = new Promise<void>((resolve) => {
+      this.log("Pretending to send current batch: ");
+      this.log(JSON.stringify(sessionParameter))
+      this.log(JSON.stringify(payloadParameter))
+      resolve();
+    });
 
-    // console.log(this.facebookAPI)
+    console.log(this.facebookAPI)
     //                                                   TODO UNHARDCODE \/
-    this.currentRequest = this.facebookAPI.appendUsersToCustomAudience("23847998265740535", sessionParameter, payloadParameter)
+    // this.currentRequest = this.facebookAPI.appendUsersToCustomAudience("23847998265740535", sessionParameter, payloadParameter)
     await this.currentRequest;
     this.currentRequest = undefined;
     return this.sendBatch();
