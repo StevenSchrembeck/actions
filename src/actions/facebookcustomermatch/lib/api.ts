@@ -188,10 +188,10 @@ export default class FacebookCustomerMatchApi {
             queryParamCharacter = "&"
         }
         const response = await gaxios.request<any>({
-          method,
-          url: url + `${queryParamCharacter}access_token=${this.accessToken}`,
-          data,
-          baseURL: API_BASE_URL,
+            method,
+            url: url + `${queryParamCharacter}access_token=${this.accessToken}`,
+            data,
+            baseURL: API_BASE_URL,
         }).catch((err) => {
             // TODO clean up this code. It can still leak access tokens if facebook replies with: "400 bad request, here's what you sent me!"
             sanitizeError(err)
@@ -202,7 +202,9 @@ export default class FacebookCustomerMatchApi {
             console.error(`Error in network request ${method} ${url} with parameters: ${typeof data === 'object' && JSON.stringify(data)}.`)
         })
         
-  
+
         return response && response.data
-      }
+    }
+
+
 }

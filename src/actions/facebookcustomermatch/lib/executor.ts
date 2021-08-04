@@ -397,9 +397,9 @@ OUT
     // });
 
     // console.log(this.facebookAPI)    
-    let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience
+    let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience.bind(this.facebookAPI)
     if(this.operationType === "replace_audience") {
-      apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience
+      apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience.bind(this.facebookAPI)
     }
     if(!this.customAudienceId) {
       throw new Error("Could not upload users because customAudienceId was missing.")
