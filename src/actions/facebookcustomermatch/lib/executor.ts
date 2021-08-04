@@ -352,16 +352,16 @@ OUT
       data: currentBatch,
     };
 
-    this.currentRequest = new Promise<void>((resolve) => {
-      this.log("Pretending to send current batch: ");
-      this.log(JSON.stringify(sessionParameter))
-      this.log(JSON.stringify(payloadParameter))
-      resolve();
-    });
+    // this.currentRequest = new Promise<void>((resolve) => {
+    //   this.log("Pretending to send current batch: ");
+    //   this.log(JSON.stringify(sessionParameter))
+    //   this.log(JSON.stringify(payloadParameter))
+    //   resolve();
+    // });
 
-    console.log(this.facebookAPI)
+    // console.log(this.facebookAPI)
     //                                                   TODO UNHARDCODE \/
-    // this.currentRequest = this.facebookAPI.appendUsersToCustomAudience("23847998265740535", sessionParameter, payloadParameter)
+    this.currentRequest = this.facebookAPI.appendUsersToCustomAudience("23847998265740535", sessionParameter, payloadParameter)
     await this.currentRequest;
     this.currentRequest = undefined;
     return this.sendBatch();
