@@ -20,22 +20,64 @@ export interface UserUploadPayload {
 }
 
 export enum UserSchema { // all lower case all the time
-    email = "EMAIL_SHA256",
-    phone = "PHONE_SHA256", // as 7705555555 with no spaces, dashes, zeros. add country code if country field is missing
-    gender = "GEN_SHA256", // m for male, f for female
-    birthYear = "DOBY_SHA256", // YYYY format. i.e. 1900
-    birthMonth = "DOBM_SHA256", // MM format. i.e. 01 for january
-    birthDay = "DOBD_SHA256", // DD format. i.e. 01
-    lastName = "LN_SHA256",
-    firstName = "FN_SHA256",
-    firstInitial = "FI_SHA256",
-    city = "CT_SHA256", //a-z only, lowercase, no punctuation, no whitespace, no special characters
-    state = "ST_SHA256", // 2 character ANSI abbreviation code https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code
-    zip = "ZIP_SHA256", // in US i.e. 30008, in UK Area/District/Sector format
-    country = "COUNTRY_SHA256", // 2 letter codes https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+    email = "EMAIL",
+    phone = "PHONE", // as 7705555555 with no spaces, dashes, zeros. add country code if country field is missing
+    gender = "GEN", // m for male, f for female
+    birthYear = "DOBY", // YYYY format. i.e. 1900
+    birthMonth = "DOBM", // MM format. i.e. 01 for january
+    birthDayOfMonth = "DOBD", // DD format. i.e. 01
+    birthday = "DOB", //YYYYMMDD
+    lastName = "LN",
+    firstName = "FN",
+    firstInitial = "FI",
+    city = "CT", //a-z only, lowercase, no punctuation, no whitespace, no special characters
+    state = "ST", // 2 character ANSI abbreviation code https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code
+    zip = "ZIP", // in US i.e. 30008, in UK Area/District/Sector format
+    country = "COUNTRY", // 2 letter codes https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
     madid = "MADID", // all lowercase, keep hyphens 
     externalId = "EXTERN_ID"
 }
+
+export interface UserFields {
+    email?: string | null,
+    phone?: string | null,
+    gender?: string | null,
+    birthYear?: string | null,
+    birthMonth?: string | null,
+    birthDayOfMonth?: string | null,
+    birthday?: string | null,
+    lastName?: string | null,
+    firstName?: string | null,
+    firstInitial?: string | null,
+    city?: string | null,
+    state?: string | null,
+    zip?: string | null,
+    country?: string | null,
+    madid?: string | null,
+    externalId?: string | null,
+    [key: string]: UserFields[keyof UserFields]
+}
+
+// [transformFunction, the multikey name facebook expects to see]
+export const validFacebookHashCombinations: [(f: UserFields) => string, string][] = [
+    [(formattedRow: UserFields) => `${formattedRow.email}`, "EMAIL_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.phone}`, "PHONE_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstName}_${formattedRow.city}_${formattedRow.state}`, "LN_FN_CT_ST_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstName}_${formattedRow.zip}`, "LN_FN_ZIP_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.madid}`, "MADID_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.email}_${formattedRow.firstName}`, "EMAIL_FN_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.email}_${formattedRow.lastName}`, "EMAIL_LN_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.phone}_${formattedRow.firstName}`, "PHONE_FN_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstName}_${formattedRow.zip}_${formattedRow.birthYear}`, "LN_FN_ZIP_DOBY_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstName}_${formattedRow.city}_${formattedRow.state}_${formattedRow.birthYear}`, "LN_FN_CT_ST_DOBY_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstInitial}_${formattedRow.zip}`, "LN_FI_ZIP_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstInitial}_${formattedRow.city}_${formattedRow.state}`, "LN_FI_CT_ST_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstInitial}_${formattedRow.state}_${formattedRow.birthday}`, "LN_FI_ST_DOB_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstName}_${formattedRow.state}_${formattedRow.birthYear}`, "LN_FN_ST_DOBY_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstName}_${formattedRow.country}_${formattedRow.birthday}`, "LN_FN_COUNTRY_DOB_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.lastName}_${formattedRow.firstName}_${formattedRow.birthday}`, "LN_FN_DOB_SHA256"],
+    [(formattedRow: UserFields) => `${formattedRow.externalId}`, "EXTERN_ID"],
+  ]  
 
 export default class FacebookCustomerMatchApi {
     readonly accessToken: string
@@ -155,6 +197,9 @@ export default class FacebookCustomerMatchApi {
             // Note that the access token is intentionally omitted from this log
             console.error(`Error in network request ${method} ${url} with parameters: ${typeof data === 'object' && JSON.stringify(data)}. Complete error was: ${err}`)
         })
+        if(response && response.data && response.data.error && response.data.error.message) {
+            console.log("Facebook error message was: " + response.data.error.message)
+        }
   
         return response && response.data
       }
