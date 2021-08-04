@@ -30,9 +30,7 @@ export default class FacebookFormBuilder {
         ],
       }]
       if (actionRequest.formParams.choose_business) {
-        if(!actionRequest.formParams.choose_ad_account) {
-          adAccounts = await facebookApi.getAdAccountsForBusiness(actionRequest.formParams.choose_business)
-        }     
+        adAccounts = await facebookApi.getAdAccountsForBusiness(actionRequest.formParams.choose_business)  
 
         form.fields.push({
           label: "Choose a Facebook ad account",
