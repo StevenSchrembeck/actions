@@ -4,8 +4,6 @@ import FacebookCustomerMatchApi from "./api";
 export default class FacebookFormBuilder {
 
     async generateActionForm(actionRequest: Hub.ActionRequest, facebookApi: FacebookCustomerMatchApi) {
-      console.log("Form params are: " + JSON.stringify(actionRequest.formParams))
-
       let businesses:{name: string, id: string}[] = []
       let adAccounts:{name: string, id: string}[] = []
       let customAudiences:{name: string, id: string}[] = []
@@ -17,7 +15,7 @@ export default class FacebookFormBuilder {
       }
 
       let form = new Hub.ActionForm()
-      form.fields = [{ // TODO replace
+      form.fields = [{
         label: "Choose a business",
         name: "choose_business",
         description: "You can start over by choosing \"Start over\" from this list.",
@@ -109,7 +107,7 @@ export default class FacebookFormBuilder {
           type: "select" as "select",
           options: [
             ...customAudienceOptions
-          ] // TODO set first one as default
+          ]
         })
         form.fields.push({
           label: "Should the data be hashed first?",
@@ -127,24 +125,6 @@ export default class FacebookFormBuilder {
 
 
       return form
-
-
-      /*
-      > serial
-      | parallel
-
-      >pick a business id
-      >pick an ad account
-      >choose create, update, or replace (which is delete all + update)
-      if(create) {
-        |enter name
-        |enter description
-        |choose hash or no hash
-      } else { // update or replace
-        |choose an audience
-        |choose hash or no hash 
-      }
-      */
     }
 
     generateOptionsFromNamesAndIds(list: {name: string, id: string}[]): {name: string, label: string}[] {

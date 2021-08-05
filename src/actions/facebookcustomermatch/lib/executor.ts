@@ -10,13 +10,12 @@ import FacebookCustomerMatchApi from "./api"
 const BATCH_SIZE = 10000; // Maximum size allowable by Facebook endpoint
 
 interface FieldMapping {
-  lookMLFieldName: string,
+  lookMLFieldName: string, // TODO remove this property if it turns out tags can't be obtained with JsonLabel streams
   fallbackRegex: any,
   userField: string, // The property that ties looker columnLabels to facebook API fields
   normalizationFunction: (s: string) => string // each one is a special snowflake...
 }
 
-// TODO move to separate files once ready
 export default class FacebookCustomerMatchExecutor {
   private actionRequest: Hub.ActionRequest
   private batchPromises: Promise<void>[] = []
@@ -217,12 +216,9 @@ export default class FacebookCustomerMatchExecutor {
     })
   }
 
-  // TODO include LookML field tags (if any) in arguments to this function or as part of "row"
   private determineSchema(row: any) {
     for (const columnLabel of Object.keys(row)) {
       for (const mapping of this.fieldMapping) {
-        // TODO lookup LookML field tags to see if they match.
-        // doing straight regex for now
         const {fallbackRegex} = mapping
 
         if(columnLabel.match(fallbackRegex)) {
@@ -271,7 +267,6 @@ OUT
 */
   // Get a uniform object that's easy to feed to transform functions
   private getFormattedRow(row: any, schema: {[s: string]: FieldMapping}): UserFields {
-    // the first invocation permanently rewrites the function to be much faster by memoizing
     let formattedRow: UserFields = this.getEmptyFormattedRow()
     Object.entries(schema).forEach(([columnLabel, mapping]) => {
       formattedRow[mapping.userField] = row[columnLabel]
@@ -388,15 +383,7 @@ OUT
       schema: this.matchedHashCombinations.map(([_transformFunction, facebookAPIFieldName]) => facebookAPIFieldName),
       data: currentBatch,
     };
-
-    // this.currentRequest = new Promise<void>((resolve) => {
-    //   this.log("Pretending to send current batch: ");
-    //   this.log(JSON.stringify(sessionParameter))
-    //   this.log(JSON.stringify(payloadParameter))
-    //   resolve();
-    // });
-
-    // console.log(this.facebookAPI)    
+   
     let apiMethodToCall = this.facebookAPI.appendUsersToCustomAudience.bind(this.facebookAPI)
     if(this.operationType === "replace_audience") {
       apiMethodToCall = this.facebookAPI.replaceUsersInCustomAudience.bind(this.facebookAPI)

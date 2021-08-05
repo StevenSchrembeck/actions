@@ -19,41 +19,22 @@ export interface UserUploadPayload {
     "data": string[] | string[][],
 }
 
-export enum UserSchema { // all lower case all the time
-    email = "EMAIL",
-    phone = "PHONE", // as 7705555555 with no spaces, dashes, zeros. add country code if country field is missing
-    gender = "GEN", // m for male, f for female
-    birthYear = "DOBY", // YYYY format. i.e. 1900
-    birthMonth = "DOBM", // MM format. i.e. 01 for january
-    birthDayOfMonth = "DOBD", // DD format. i.e. 01
-    birthday = "DOB", //YYYYMMDD
-    lastName = "LN",
-    firstName = "FN",
-    firstInitial = "FI",
-    city = "CT", //a-z only, lowercase, no punctuation, no whitespace, no special characters
-    state = "ST", // 2 character ANSI abbreviation code https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code
-    zip = "ZIP", // in US i.e. 30008, in UK Area/District/Sector format
-    country = "COUNTRY", // 2 letter codes https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-    madid = "MADID", // all lowercase, keep hyphens 
-    externalId = "EXTERN_ID"
-}
-
 export interface UserFields {
     email?: string | null,
-    phone?: string | null,
-    gender?: string | null,
-    birthYear?: string | null,
-    birthMonth?: string | null,
-    birthDayOfMonth?: string | null,
-    birthday?: string | null,
+    phone?: string | null, // as 7705555555 with no spaces, dashes, zeros. add country code if country field is missing
+    gender?: string | null, // m for male, f for female
+    birthYear?: string | null, // YYYY format. i.e. 1900
+    birthMonth?: string | null, // MM format. i.e. 01 for january
+    birthDayOfMonth?: string | null, // DD format. i.e. 01
+    birthday?: string | null, //YYYYMMDD
     lastName?: string | null,
     firstName?: string | null,
     firstInitial?: string | null,
-    city?: string | null,
-    state?: string | null,
-    zip?: string | null,
-    country?: string | null,
-    madid?: string | null,
+    city?: string | null, // a-z only, lowercase, no punctuation, no whitespace, no special characters
+    state?: string | null, // 2 character ANSI abbreviation code https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code
+    zip?: string | null, // in US i.e. 30008, in UK Area/District/Sector format
+    country?: string | null, // 2 letter codes https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+    madid?: string | null, // all lowercase, keep hyphens 
     externalId?: string | null,
     [key: string]: UserFields[keyof UserFields]
 }
@@ -89,22 +70,22 @@ export default class FacebookCustomerMatchApi {
         return this.apiCall("GET", "me")
     }
 
-    /*Sample response:
+    /*Sample response: 
     {
         "businesses": {
             "data": [
             {
-                "id": "497949387983810",
-                "name": "Webcraft LLC"
+                "id": "496949287383810",
+                "name": "Cool Guys Moving LLC"
             },
             {
-                "id": "104000287081747",
-                "name": "4 Mile Analytics"
+                "id": "104000277081747",
+                "name": "Western Analytics"
             }
             ],
         }
         "paging": ...
-        "id": "106358305032036"
+        "id": "106332305032035"
     }*/
     async getBusinessAccountIds(): Promise<{name: string, id: string}[]> {
         const response = await this.apiCall("GET", "me?fields=businesses")
@@ -119,8 +100,8 @@ export default class FacebookCustomerMatchApi {
             "data": [
                 {
                 "name": "Test Ad Account 1",
-                "account_id": "114109700789636",
-                "id": "act_114109700789636"
+                "account_id": "114108701688636",
+                "id": "act_114108701688636"
                 }
             ],
             "paging": {}
@@ -139,7 +120,7 @@ export default class FacebookCustomerMatchApi {
         "data": [
             {
             "name": "My new Custom Audience",
-            "id": "23847792490850535"
+            "id": "23837492450850533"
             }
         ],
         "paging":...
