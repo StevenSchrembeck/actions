@@ -24,7 +24,7 @@ export default class FacebookFormBuilder {
         type: "select" as "select",
         options: [
           {name: "reset", label: "Start over"},
-          ...this.generateOptionsFromNamesAndIds(businesses)
+          ...(await this.generateOptionsFromNamesAndIds(businesses))
         ],
       }]
       if (actionRequest.formParams.choose_business) {
@@ -37,7 +37,7 @@ export default class FacebookFormBuilder {
           interactive: true,
           type: "select" as "select",
           options: [
-            ...this.generateOptionsFromNamesAndIds(adAccounts)
+            ...(await this.generateOptionsFromNamesAndIds(adAccounts))
           ],
         })
       }
@@ -127,7 +127,7 @@ export default class FacebookFormBuilder {
       return form
     }
 
-    generateOptionsFromNamesAndIds(list: {name: string, id: string}[]): {name: string, label: string}[] {
+    async generateOptionsFromNamesAndIds(list: {name: string, id: string}[]): Promise<{name: string, label: string}[]> {
       return list.map((item) => ({
         "name": item.id,
         "label": item.name

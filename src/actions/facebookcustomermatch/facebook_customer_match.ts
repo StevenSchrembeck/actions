@@ -35,7 +35,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
   async execute(hubRequest: Hub.ActionRequest) {
     let response = new Hub.ActionResponse()
-    const accessToken = this.getAccessTokenFromRequest(hubRequest)
+    const accessToken = await this.getAccessTokenFromRequest(hubRequest)
 
     if(!accessToken) {
       response.state = new Hub.ActionState()
@@ -53,7 +53,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     const formBuilder = new FacebookFormBuilder();
     try {
       const isAlreadyAuthenticated = await this.oauthCheck(hubRequest) 
-      const accessToken = this.getAccessTokenFromRequest(hubRequest)
+      const accessToken = await this.getAccessTokenFromRequest(hubRequest)
       if(isAlreadyAuthenticated && accessToken){
         const facebookApi = new FacebookCustomerMatchApi(accessToken)
         const actionForm = formBuilder.generateActionForm(hubRequest, facebookApi)
@@ -136,7 +136,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
   */
   async oauthCheck(request: Hub.ActionRequest): Promise<boolean> {
     try {
-      const accessToken = this.getAccessTokenFromRequest(request)
+      const accessToken = await this.getAccessTokenFromRequest(request)
       if (!accessToken) {
         console.log("Failed oauthCheck because access token was missing or malformed")
         return false
@@ -156,7 +156,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     }
   }
 
-  protected getAccessTokenFromRequest(request: Hub.ActionRequest) : string | null {
+  protected async getAccessTokenFromRequest(request: Hub.ActionRequest) : Promise<string | null> {
     try {
       const params: any = request.params;
       return JSON.parse(params.state_json).tokens.longLivedToken;
