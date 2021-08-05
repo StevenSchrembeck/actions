@@ -94,7 +94,7 @@ export default class FacebookFormBuilder {
         customAudiences = await facebookApi.getCustomAudiences(actionRequest.formParams.choose_ad_account)
 
         const audienceActionType = actionRequest.formParams.choose_create_update_replace === "update_audience" ? "update" : "replace"
-        const customAudienceOptions = [...(this.generateOptionsFromNamesAndIds(customAudiences))]
+        const customAudienceOptions = [... await (this.generateOptionsFromNamesAndIds(customAudiences))]
         let audienceSelectDescription = audienceActionType === "replace" ? "Replacing deletes all users from the audience then replaces them with new ones" : "";
         if(customAudienceOptions.length <= 0) {
           audienceSelectDescription = "You have no custom audiences for this ad account. You can create one by selecting \"Create new audience\" above."
