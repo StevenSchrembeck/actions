@@ -1,5 +1,6 @@
 import * as Hub from "../../../hub";
 
+import * as winston from "winston"
 import * as crypto from "crypto"
 import * as oboe from "oboe"
 import { Readable } from "stream"
@@ -164,13 +165,7 @@ export default class FacebookCustomerMatchExecutor {
     return this.batchPromises.length
   }
 
-  private log(level: String, ...rest: String[]) {
-    console.log(level + " " + rest.join(" "));
-  }
-
-
   async run() {
-    console.log("Final form params are: " + JSON.stringify(this.actionRequest.formParams))
     if (this.operationType === "create_audience") {
       if(!this.customAudienceName || !this.customAudienceDescription) {
         throw new Error("Cannot create an audience if name or description are missing.")
@@ -189,10 +184,10 @@ export default class FacebookCustomerMatchExecutor {
       })
     } catch (errorReport) {
       // TODO: the oboe fail() handler sends an errorReport object, but that might not be the only thing we catch
-      this.log("error", "Streaming parse failure:", errorReport.toString())
+      winston.error("Streaming parse failure:" +  errorReport.toString())
     }
     await Promise.all(this.batchPromises)
-    this.log("info",
+    winston.debug("info",
       `Streaming upload complete. Sent ${this.numBatches} batches (batch size = ${BATCH_SIZE})`,
     )
   }
@@ -226,7 +221,6 @@ export default class FacebookCustomerMatchExecutor {
         }
       }
     }
-    console.log(`Schema is: ` + JSON.stringify(this.schema))
     const formattedRow = this.getFormattedRow(row, this.schema)
     this.matchedHashCombinations = this.getMatchingHashCombinations(formattedRow, validFacebookHashCombinations)
     this.isSchemaDetermined = true

@@ -1,4 +1,5 @@
 import * as Hub from "../../../hub";
+import * as winston from "winston"
 import FacebookCustomerMatchApi from "./api";
 
 export default class FacebookFormBuilder {
@@ -143,7 +144,7 @@ export default class FacebookFormBuilder {
         const actionCrypto = new Hub.ActionCrypto()
         encryptedPayload = await actionCrypto.encrypt(payloadString)
       } catch (e) {
-        console.log("error", "Payload encryption error:", e.toString())
+        winston.error("Payload encryption error:", e.toString())
         throw e
       }
   
@@ -152,7 +153,7 @@ export default class FacebookFormBuilder {
       const startAuthUrl =
         `${process.env.ACTION_HUB_BASE_URL}/actions/facebook_customer_match/oauth?state=${encryptedPayload}`
   
-      console.log("debug", "login form has startAuthUrl=", startAuthUrl)
+      winston.debug("login form has startAuthUrl=", startAuthUrl)
   
       const form = new Hub.ActionForm()
       form.state = new Hub.ActionState()

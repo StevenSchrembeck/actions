@@ -1,12 +1,14 @@
 import * as gaxios from "gaxios"
 import * as Hub from "../../hub"
+
+import * as winston from "winston"
 import {URL} from "url"
 import * as querystring from "querystring"
+
 import FacebookCustomerMatchExecutor from "./lib/executor"
 import FacebookFormBuilder from "./lib/form_builder"
 import {sanitizeError} from "./lib/util";
 import FacebookCustomerMatchApi from "./lib/api"
-// const LOG_PREFIX = "[FB Ads Customer Match]"
 
 export class FacebookCustomerMatchAction extends Hub.OAuthAction {
 
@@ -61,7 +63,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       }
     } catch (err) {
       sanitizeError(err);
-      console.error(err);
+      winston.error(err);
     }
 
     // Return the login form to start over if anything goes wrong during authentication or form construction
@@ -88,7 +90,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       const actionCrypto = new Hub.ActionCrypto()
       plaintext = await actionCrypto.decrypt(urlParams.state)
     } catch (err) {
-      console.log("error", "Encryption not correctly configured: ", err.toString())
+      winston.error("Encryption not correctly configured: " + err.toString())
       throw err
     }
 
@@ -113,9 +115,9 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       sanitizeError(err)
       // We have seen weird behavior where Looker correctly updates the state, but returns a nonsense status code
       if (err instanceof gaxios.GaxiosError && err.response !== undefined && err.response.status < 100) {
-        console.log("debug", "Ignoring state update response with response code <100")
+        winston.debug("Ignoring state update response with response code <100")
       } else {
-        console.log("error", "Error sending user state to Looker:", err && err.toString())
+        winston.error("Error sending user state to Looker:" + (err && err.toString()))
         throw err
       }
     }
@@ -138,20 +140,19 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
     try {
       const accessToken = await this.getAccessTokenFromRequest(request)
       if (!accessToken) {
-        console.log("Failed oauthCheck because access token was missing or malformed")
+        winston.error("Failed oauthCheck because access token was missing or malformed")
         return false
       }
       const userDataRequestUri = `https://graph.facebook.com/v11.0/me?access_token=${accessToken}`;
       const userDataResponse = await gaxios.request<any>({method: 'GET', url: userDataRequestUri})      
       if (userDataResponse.data.error && userDataResponse.data.error.message) {
-        console.log("Failed oauthCheck because access token was expired or due to an error: " + userDataResponse.data.error.message)
+        winston.debug("Failed oauthCheck because access token was expired or due to an error: " + userDataResponse.data.error.message)
         return false;
       }
-      console.log("OAUTH CHECK PASSED")
       return true
     } catch (err) {
       sanitizeError(err)
-      console.log("Failed oauthCheck because access token was expired or due to an error: " + err)
+      winston.debug("Failed oauthCheck because access token was expired or due to an error: " + err)
       return false;
     }
   }
@@ -161,7 +162,7 @@ export class FacebookCustomerMatchAction extends Hub.OAuthAction {
       const params: any = request.params;
       return JSON.parse(params.state_json).tokens.longLivedToken;
     } catch (err) {
-      console.error("Failed to parse state for access token.")
+      winston.error("Failed to parse state for access token.")
       return null;
     }
   }
