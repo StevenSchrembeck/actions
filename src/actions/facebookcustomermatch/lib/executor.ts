@@ -195,7 +195,7 @@ export default class FacebookCustomerMatchExecutor {
   private async startAsyncParser(downloadStream: Readable) {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
-        .node("*", (row: any, path: string, ancestors: any[]) => {    
+        .node("!.*", (row: any, path: string, ancestors: any[]) => {    
           debugger;      
           console.log(path)
           console.log(ancestors)
