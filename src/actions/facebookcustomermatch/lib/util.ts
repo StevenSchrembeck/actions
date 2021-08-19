@@ -31,9 +31,6 @@ export function removeAllWhitespace(str: string) : string {
     return str.replace(/\s/g, "")
 }
 export function removeNonRomanAlphaNumeric(str: string, keepWhitespace?: boolean) : string {
-    if(!str) {
-        debugger;
-    }
     if (keepWhitespace) {
         return str.replace(/[^a-zA-Z0-9\s]+/g, "")
     }
