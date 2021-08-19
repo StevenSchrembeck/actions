@@ -8,7 +8,6 @@ import { Readable } from "stream"
 import { UserUploadSession, UserUploadPayload, UserFields, validFacebookHashCombinations} from "./api"
 import FacebookCustomerMatchApi from "./api"
 import {
-  removeAllWhitespace, 
   removeNonRomanAlphaNumeric, 
   countryNameTo2Code, 
   usStateNameTo2Code, 
@@ -206,20 +205,22 @@ export default class FacebookCustomerMatchExecutor {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
         .node({"!.fields": (row: any, path: string, ancestors: any[]) => {    
-          debugger;      
+          console.log("fields stream")
           console.log(path)
           console.log(ancestors)
           if (!this.isSchemaDetermined) {
             this.determineSchema(row)
           }
+          debugger;      
           this.handleRow(row)
           this.scheduleBatch()
           return oboe.drop
         }, "!.data.*" :(row: any, path: string, ancestors: any[]) => {    
-          debugger;     
+          console.log("data stream")
           console.log(row) 
           console.log(path)
           console.log(ancestors)
+          debugger;     
         }
         })
         .done(() => {
