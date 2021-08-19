@@ -37,8 +37,8 @@ export function removeNonRomanAlphaNumeric(str: string, keepWhitespace?: boolean
     return str.replace(/[^a-zA-Z0-9]+/g, "")
 }
 
-export function countryNameTo2Code(name: string, localeString:string = "en") {
-    countries.getAlpha2Code(name, localeString)
+export function countryNameTo2Code(name: string, localeString:string = "en"): string {
+    return countries.getAlpha2Code(name, localeString)
 }
 
 export function usStateNameTo2Code(name: string) : string {

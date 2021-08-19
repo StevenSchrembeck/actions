@@ -204,14 +204,13 @@ export default class FacebookCustomerMatchExecutor {
   private async startAsyncParser(downloadStream: Readable) {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
-        .node({"!.fields": (field: any) => {
+        .node({"!.fields": (fieldData: any) => {
           // we only pull the high level fields data once in a separate listener. purely to determine the schema
           console.log("Parsing fields data")
           
           if (!this.isSchemaDetermined) {
-            debugger;
             // Field data looks like: {measures: Array(0), dimensions: Array(8), table_calculations: Array(0), pivots: Array(0)}
-            let combinedFields = [...field.dimensions, ...field.measures]
+            let combinedFields = [...fieldData.dimensions, ...fieldData.measures]
             // prune the object to just the subset of data we need, then combine into one object
             combinedFields = combinedFields.reduce((aggregator, field) => {
               aggregator[field.name] = {
@@ -229,7 +228,6 @@ export default class FacebookCustomerMatchExecutor {
           // i.e. { users.city:{value: 'Abbeville'}, "users.zip": ... }
           // becomes
           // { users.city: 'Abbeville' }
-          debugger;
           row = Object.entries(row).reduce((accumulator: any, [key, val]: any[]) => {
             accumulator[key] = val["value"]
             return accumulator
