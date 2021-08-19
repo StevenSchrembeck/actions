@@ -267,6 +267,9 @@ export default class FacebookCustomerMatchExecutor {
 
         if(tagMatched || columnLabel.match(fallbackRegex)) {
           this.schema[columnLabel] = mapping
+          winston.debug("info",
+              `Matched ${columnLabel} by regex.`,
+            )
         } else {
           winston.debug("info",
             `Could not match field ${columnLabel} by tags or regex. Dropping it from upload.`,
@@ -385,7 +388,8 @@ OUT
   private normalizeRow(row: any) {
     const normalizedRow = {...row}
     Object.entries(this.schema).forEach(([columnLabel, mapping]) => {
-      normalizedRow[columnLabel] = mapping.normalizationFunction(row[columnLabel])
+      const rowValue = row[columnLabel] + "" // coercec things like phone numbers to string
+      normalizedRow[columnLabel] = mapping.normalizationFunction(rowValue)
     })
     return normalizedRow
   }
