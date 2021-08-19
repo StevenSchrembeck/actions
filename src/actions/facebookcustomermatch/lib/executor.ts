@@ -209,7 +209,8 @@ export default class FacebookCustomerMatchExecutor {
           console.log("Parsing fields data")
           
           if (!this.isSchemaDetermined) {
-            const [, fieldData] = metadata
+            let [, fieldData] = metadata
+            debugger;
             // Field data looks like: {measures: Array(2), dimensions: Array(8), table_calculations: Array(0), pivots: Array(0)}
             let combinedFields = [...fieldData.dimensions, ...fieldData.measures]
             // prune the object to just the subset of data we need
