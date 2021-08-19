@@ -206,7 +206,9 @@ export default class FacebookCustomerMatchExecutor {
       oboe(downloadStream)
         .node({"!.fields": (fieldData: any) => {
           // we only pull the high level fields data once in a separate listener. purely to determine the schema
-          console.log("Parsing fields data")
+          winston.debug("info",
+            `Received stream data. Determining schema from LookML field tags and regex.`,
+          )
           
           if (!this.isSchemaDetermined) {
             // Field data looks like: {measures: Array(0), dimensions: Array(8), table_calculations: Array(0), pivots: Array(0)}
@@ -255,11 +257,18 @@ export default class FacebookCustomerMatchExecutor {
         if(row[columnLabel].tags && row[columnLabel].tags.length > 0) {
           if (row[columnLabel].tags.some((tag: string) => tag.toLowerCase() === lookMLFieldName.toLowerCase())) {
             tagMatched = true
+            winston.debug("info",
+              `Matched ${columnLabel} by LookML field tag.`,
+            )
           }
         }
 
         if(tagMatched || columnLabel.match(fallbackRegex)) {
           this.schema[columnLabel] = mapping
+        } else {
+          winston.debug("info",
+            `Could not match field ${columnLabel} by tags or regex. Dropping it from upload.`,
+          )
         }
       }
     }
