@@ -204,15 +204,14 @@ export default class FacebookCustomerMatchExecutor {
   private async startAsyncParser(downloadStream: Readable) {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
-        .node({"!.fields": (_propertyName: any, metadata: any) => {
+        .node({"!.fields": (field: any) => {
           // we only pull the high level fields data once in a separate listener. purely to determine the schema
           console.log("Parsing fields data")
           
           if (!this.isSchemaDetermined) {
-            let [, fieldData] = metadata
             debugger;
-            // Field data looks like: {measures: Array(2), dimensions: Array(8), table_calculations: Array(0), pivots: Array(0)}
-            let combinedFields = [...fieldData.dimensions, ...fieldData.measures]
+            // Field data looks like: {measures: Array(0), dimensions: Array(8), table_calculations: Array(0), pivots: Array(0)}
+            let combinedFields = [...field.dimensions, ...field.measures]
             // prune the object to just the subset of data we need, then combine into one object
             combinedFields = combinedFields.reduce((aggregator, field) => {
               aggregator[field.name] = {
