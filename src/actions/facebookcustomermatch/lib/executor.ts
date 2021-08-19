@@ -213,13 +213,14 @@ export default class FacebookCustomerMatchExecutor {
             debugger;
             // Field data looks like: {measures: Array(2), dimensions: Array(8), table_calculations: Array(0), pivots: Array(0)}
             let combinedFields = [...fieldData.dimensions, ...fieldData.measures]
-            // prune the object to just the subset of data we need
-            combinedFields = combinedFields.map((field) => ({
-              [field.name]: {
+            // prune the object to just the subset of data we need, then combine into one object
+            combinedFields = combinedFields.reduce((aggregator, field) => {
+              aggregator[field.name] = {
                 value: null, // not important for determining schema
                 tags: field.tags || []
-              } 
-            }))
+              }
+              return aggregator
+            }, {})
             this.determineSchema(combinedFields)
           }
           
@@ -229,6 +230,7 @@ export default class FacebookCustomerMatchExecutor {
           // i.e. { users.city:{value: 'Abbeville'}, "users.zip": ... }
           // becomes
           // { users.city: 'Abbeville' }
+          debugger;
           row = Object.entries(row).reduce((accumulator: any, [key, val]: any[]) => {
             accumulator[key] = val["value"]
             return accumulator
