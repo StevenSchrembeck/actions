@@ -204,23 +204,37 @@ export default class FacebookCustomerMatchExecutor {
   private async startAsyncParser(downloadStream: Readable) {
     return new Promise<void>((resolve, reject) => {
       oboe(downloadStream)
-        .node({"!.fields": (row: any, path: string, ancestors: any[]) => {    
-          console.log("fields stream")
-          console.log(path)
-          console.log(ancestors)
+        .node({"!.fields": (_propertyName: any, metadata: any) => {
+          // we only pull the high level fields data once in a separate listener. purely to determine the schema
+          console.log("Parsing fields data")
+          
           if (!this.isSchemaDetermined) {
-            this.determineSchema(row)
+            const [, fieldData] = metadata
+            // Field data looks like: {measures: Array(2), dimensions: Array(8), table_calculations: Array(0), pivots: Array(0)}
+            let combinedFields = [...fieldData.dimensions, ...fieldData.measures]
+            // prune the object to just the subset of data we need
+            combinedFields = combinedFields.map((field) => ({
+              [field.name]: {
+                value: null, // not important for determining schema
+                tags: field.tags || []
+              } 
+            }))
+            this.determineSchema(combinedFields)
           }
-          debugger;      
+          
+          return oboe.drop
+        }, "!.data.*" :(row: any) => {
+          // the reduce below just strips the superfluous object and "value property from the row
+          // i.e. { users.city:{value: 'Abbeville'}, "users.zip": ... }
+          // becomes
+          // { users.city: 'Abbeville' }
+          row = Object.entries(row).reduce((accumulator: any, [key, val]: any[]) => {
+            accumulator[key] = val["value"]
+            return accumulator
+          }, {})
           this.handleRow(row)
           this.scheduleBatch()
           return oboe.drop
-        }, "!.data.*" :(row: any, path: string, ancestors: any[]) => {    
-          console.log("data stream")
-          console.log(row) 
-          console.log(path)
-          console.log(ancestors)
-          debugger;     
         }
         })
         .done(() => {
@@ -234,9 +248,17 @@ export default class FacebookCustomerMatchExecutor {
   private determineSchema(row: any) {
     for (const columnLabel of Object.keys(row)) {
       for (const mapping of this.fieldMapping) {
-        const {fallbackRegex} = mapping
+        const {fallbackRegex, lookMLFieldName} = mapping
+        let tagMatched: boolean = false
 
-        if(columnLabel.match(fallbackRegex)) {
+        // attempt to match fields by lookml tags first
+        if(row[columnLabel].tags && row[columnLabel].tags.length > 0) {
+          if (row[columnLabel].tags.some((tag: string) => tag.toLowerCase() === lookMLFieldName.toLowerCase())) {
+            tagMatched = true
+          }
+        }
+
+        if(tagMatched || columnLabel.match(fallbackRegex)) {
           this.schema[columnLabel] = mapping
         }
       }
