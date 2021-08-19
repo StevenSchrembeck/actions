@@ -7,6 +7,16 @@ import { Readable } from "stream"
 
 import { UserUploadSession, UserUploadPayload, UserFields, validFacebookHashCombinations} from "./api"
 import FacebookCustomerMatchApi from "./api"
+import {
+  removeAllWhitespace, 
+  removeNonRomanAlphaNumeric, 
+  countryNameTo2Code, 
+  usStateNameTo2Code, 
+  genderNameToCode, 
+  getMonth, 
+  getDayOfMonth, 
+  formatFullDate,
+} from "./util"
 
 const BATCH_SIZE = 10000; // Maximum size allowable by Facebook endpoint
 
@@ -75,31 +85,31 @@ export default class FacebookCustomerMatchExecutor {
       lookMLFieldName: "Phone",
       fallbackRegex: /phone/i,
       userField: "phone",
-      normalizationFunction: this.normalize
+      normalizationFunction: removeNonRomanAlphaNumeric
     },
     {
       lookMLFieldName: "Gender",
       fallbackRegex: /gender/i,
       userField: "gender",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => genderNameToCode(this.normalize(value))
     },
     {
       lookMLFieldName: "BirthYear",
       fallbackRegex: /year/i,
       userField: "birthYear",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => formatFullDate(this.normalize(value))
     },
     {
       lookMLFieldName: "BirthMonth",
       fallbackRegex: /month/i,
       userField: "birthMonth",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => getMonth(this.normalize(value))
     },
     {
       lookMLFieldName: "BirthDay",
       fallbackRegex: /day/i,
       userField: "birthDay",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => getDayOfMonth(this.normalize(value))
     },
     {
       lookMLFieldName: "LastName",
@@ -117,19 +127,19 @@ export default class FacebookCustomerMatchExecutor {
       lookMLFieldName: "FirstInitial",
       fallbackRegex: /initial/i,
       userField: "firstInitial",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => removeNonRomanAlphaNumeric(this.normalize(value))
     },
     {
       lookMLFieldName: "City",
       fallbackRegex: /city/i,
       userField: "city",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => removeNonRomanAlphaNumeric(this.normalize(value))
     },
     {
       lookMLFieldName: "State",
       fallbackRegex: /state/i,
       userField: "state",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => usStateNameTo2Code(this.normalize(value))
     },
     {
       lookMLFieldName: "Zip",
@@ -141,7 +151,7 @@ export default class FacebookCustomerMatchExecutor {
       lookMLFieldName: "Country",
       fallbackRegex: /country/i,
       userField: "country",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value: string) => countryNameTo2Code(this.normalize(value))
     },
     {
       lookMLFieldName: "MadID",
@@ -153,7 +163,7 @@ export default class FacebookCustomerMatchExecutor {
       lookMLFieldName: "ExternalID",
       fallbackRegex: /external/i,
       userField: "externalId",
-      normalizationFunction: this.normalize
+      normalizationFunction: (value:string) => value // NOOP
     },
   ]
 
